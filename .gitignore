@@ -1,6 +1,9 @@
 # Agent scratch space: logs, dumps, one-off scripts, fetched pages.
 .tmp/
 
+# Tool scratch output. It belongs in .tmp/, and this is the belt.
+.playwright-cli/
+
 # Written by `openspec update`; the tool owns it.
 .agents/skills/.openspec-target
 
