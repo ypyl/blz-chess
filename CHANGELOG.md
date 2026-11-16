@@ -5,6 +5,11 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
+### Fixed
+
+- Knights were drawn as kings, because the piece image was chosen by the first
+  letter of the piece name and Knight and King share it.
+
 ### Added
 
 - Play a game against Stockfish. The page opens on six named levels, from "No idea
