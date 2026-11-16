@@ -68,3 +68,31 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+
+  # A green deploy proves Pages accepted the artifact, not that the site works.
+  # This fetches the shell, proves the base path, and proves the boot script the
+  # shell names is really there.
+  smoke:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke the deployed site
+        env:
+          BASE_PATH: /blz-chess/
+        run: |
+          url="https://${GITHUB_REPOSITORY_OWNER}.github.io${BASE_PATH}"
+          for attempt in $(seq 1 12); do
+            if body=$(curl -fsS "$url"); then break; fi
+            echo "attempt $attempt: $url not answering yet"
+            sleep 10
+          done
+          test -n "${body:-}" || { echo "::$error::$url never answered"; exit 1; }
+
+          grep -q "base href=\"${BASE_PATH}\"" <<< "$body"
+
+          asset=$(grep -oE '_framework/blazor\.webassembly\.[a-z0-9]+\.js' <<< "$body" | head -1)
+          test -n "$asset" || { echo "::$error::the shell names no boot script"; exit 1; }
+          curl -fsS -o /dev/null "$url${asset}"
+          curl -fsS -o /dev/null "${url}manifest.webmanifest"
+
+          echo "smoke passed: $url"
