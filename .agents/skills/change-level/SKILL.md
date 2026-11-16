@@ -177,8 +177,9 @@ owns the voice. What is specific to this step:
   gates, in that order, recorded as two blocks.
 - **L3:** same as L2, then the evidence. Apply only after approval.
 
-`node scripts/gate.mjs <change>` renders the artifacts and blocks until the
-human submits; exit 0 approved, 2 changes, 3 no response. On 3, stop: nothing
+`node scripts/gate.mjs <change>` renders that level's gate and blocks until the
+human submits; exit 0 approved, 2 changes, 3 no response. The gate is the ADR at
+L2 and L3 and the delta spec at L1, so a bare run never shows everything. On 3, stop: nothing
 was recorded, so say you will wait until the human is ready and reopen the same
 revision when they are. On 2, comments mean a new revision: revise, `--rev`+1,
 open again. `AGENTS.md` **How a gate is presented** holds the rest.

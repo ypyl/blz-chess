@@ -12,7 +12,7 @@ import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { md, sha256, stripRecord, artifactHash, arrange, selectForGate, collectArtifacts, changeDir, validateSubmission, renderPage, verify } from './gate.mjs';
+import { md, sha256, stripRecord, artifactHash, arrange, selectForGate, defaultGate, collectArtifacts, changeDir, validateSubmission, renderPage, verify } from './gate.mjs';
 
 const PROPOSAL = `# Bootstrap
 
@@ -282,4 +282,28 @@ test('the page says which gate it is', async () => {
   const whole = renderPage({ change: 'demo', revision: 1, level, files });
   assert.match(whole, /"gate":"all"/);
   await rm(root, { recursive: true, force: true });
+});
+
+test('a wrapped list item stays one item', () => {
+  const html = md('- first line\n  second line\n- next\n');
+  assert.equal(html, '<ul>\n<li>first line second line</li>\n<li>next</li>\n</ul>');
+  const ordered = md('1. one\n   continues here\n2. two\n');
+  assert.match(ordered, /<li>one continues here<\/li>/);
+  assert.doesNotMatch(ordered, /<p>/);
+});
+
+test('a code span split across a wrap is still one code span', () => {
+  const html = md('- run `npm test` on\n  the branch\n');
+  assert.equal(html, '<ul>\n<li>run <code>npm test</code> on the branch</li>\n</ul>');
+});
+
+test('a nested bullet stays flat, which is the documented limit', () => {
+  const html = md('- a\n  - b\n- c\n');
+  assert.equal(html, '<ul>\n<li>a</li>\n<li>b</li>\n<li>c</li>\n</ul>');
+});
+
+test('the page shows the gate unless everything is asked for', () => {
+  assert.equal(defaultGate('adr'), 'adr');
+  assert.equal(defaultGate('spec'), 'spec');
+  assert.equal(defaultGate('proposal'), 'all', 'an L0 or bootstrap page is the whole change');
 });

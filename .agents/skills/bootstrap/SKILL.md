@@ -121,9 +121,11 @@ One gate, not two. Write the summary into `proposal.md`, then open the page:
 node scripts/gate.mjs bootstrap
 ```
 
-It blocks until the human submits, and the page shows how long it will wait. No
-`--gate` here: bootstrap has one gate and no delta spec, so the page is the ADR,
-the proposal, and the design. What the page must carry:
+It blocks until the human submits, and the page shows how long it will wait.
+With no `--gate` the page is the change's gate, which for bootstrap is the ADR:
+the decision plus the proposal that summarises it. Design and tasks are the plan,
+not the decision, so they are neither shown nor hashed. What the page must
+carry:
 
 - the product in the human's words, and what was recorded as out of scope
 - the stack, and the rejected options one line each
@@ -135,8 +137,8 @@ Do not ask them to judge the ADR. The ADR is the record; the summary is the
 decision. Exit 2 means comments came back: revise, open `--rev 2`, and wait
 again. Exit 3 means the page closed with no answer: nothing was recorded, so
 stop and say you will wait until the human is ready, then reopen the same
-revision. Exit 0 means approved: add the approval block with the hashes from
-`.tmp/gate/bootstrap-r1.json`, then amend the freeze commit, as `AGENTS.md`
+revision. Exit 0 means approved: add the approval block with the hashes from the
+submission the command printed, then amend the freeze commit, as `AGENTS.md`
 says.
 
 ## 6. Apply

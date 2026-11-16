@@ -177,11 +177,12 @@ human did not give.
 
 The bootstrap work is one L2 change with `skip_specs: true`, one gate, and the
 answers as its artifact. The proposal carries `## Why`, `## What Changes`, and an
-`## Answers` table. The gate is the page `node scripts/gate.mjs bootstrap`
-opens: the product in their words, the stack with the rejected options, every
-assumption, what will be created, and what is deferred. The ADR is the durable
-record; the summary is what the human reads. Apply, verify, archive, and merge
-in the same session.
+`## Answers` table. The gate is the ADR page `node scripts/gate.mjs bootstrap`
+opens, with the proposal beside it: the product in their words, the stack with
+the rejected options, every assumption, what will be created, and what is
+deferred. Design and tasks are the plan, so they are not on the page and not in
+the record. The ADR is the durable record; the summary is what the human reads.
+Apply, verify, archive, and merge in the same session.
 
 What that change produces: the product README, **What this is**, Project facts,
 the first `CONVENTIONS.md` entries, the ignore and editor files, the lockfile

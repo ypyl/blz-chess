@@ -115,6 +115,21 @@ export function md(source) {
   const tableRow = /^\s*\|/;
   const tableRule = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 
+  // A block starts a new element. Anything else is a wrapped line of the element
+  // above it, which is how every artifact in the repository is written.
+  const startsBlock = (text) =>
+    /^(#{1,6}\s|\s*[-*]\s|\s*\d+[.)]\s|\s*```|\s*>|\s*\|)/.test(text);
+  const continues = (text) => text.trim() !== '' && !startsBlock(text);
+  let lastLine = 0;
+  const gather = (text, from) => {
+    let body = text;
+    lastLine = from;
+    while (lastLine + 1 < lines.length && continues(lines[lastLine + 1])) {
+      body += ' ' + lines[++lastLine].trim();
+    }
+    return body;
+  };
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (/^\s*```/.test(line)) {
@@ -141,7 +156,8 @@ export function md(source) {
         out.push('<ul>');
         list = 'ul';
       }
-      out.push(`<li>${inline(line.replace(/^\s*[-*]\s+/, ''))}</li>`);
+      out.push(`<li>${inline(gather(line.replace(/^\s*[-*]\s+/, ''), i))}</li>`);
+      i = lastLine;
       continue;
     }
     if (/^\s*\d+[.)]\s+/.test(line)) {
@@ -150,7 +166,8 @@ export function md(source) {
         out.push('<ol>');
         list = 'ol';
       }
-      out.push(`<li>${inline(line.replace(/^\s*\d+[.)]\s+/, ''))}</li>`);
+      out.push(`<li>${inline(gather(line.replace(/^\s*\d+[.)]\s+/, ''), i))}</li>`);
+      i = lastLine;
       continue;
     }
     if (/^\s*>\s?/.test(line)) {
@@ -176,7 +193,7 @@ export function md(source) {
     while (
       i + 1 < lines.length &&
       lines[i + 1].trim() &&
-      !/^(#{1,6}\s|\s*[-*]\s|\s*\d+[.)]\s|\s*```|\s*>|\s*\|)/.test(lines[i + 1])
+      !startsBlock(lines[i + 1])
     ) {
       para.push(lines[++i]);
     }
@@ -282,6 +299,13 @@ export function arrange(files, gateKind) {
     const rank = (file) => (file.kind === gateKind ? -1 : order.indexOf(file.kind));
     return rank(a) - rank(b) || a.label.localeCompare(b.label);
   });
+}
+
+// The page shows the gate, not the change. Asking for everything is a deliberate
+// act, because a page that shows the decision and its consequences together
+// invites approving both at once.
+export function defaultGate(gateKind) {
+  return gateKind === 'adr' || gateKind === 'spec' ? gateKind : 'all';
 }
 
 // L2 and L3 gate the decision before the behavior: the ADR first, the delta spec
@@ -550,7 +574,7 @@ export async function verify(change, root = ROOT) {
 /* ---------- cli ---------- */
 
 function parseArgs(argv) {
-  const options = { rev: 1, port: 0, timeout: 900, static: false, open: true, gate: 'all' };
+  const options = { rev: 1, port: 0, timeout: 900, static: false, open: true, gate: null };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -567,7 +591,7 @@ function parseArgs(argv) {
     else rest.push(arg);
   }
   options.change = rest[0];
-  if (!['all', 'adr', 'spec'].includes(options.gate)) {
+  if (options.gate !== null && !['all', 'adr', 'spec'].includes(options.gate)) {
     throw new Error(`--gate takes adr, spec, or all, not ${options.gate}`);
   }
   return options;
@@ -600,7 +624,7 @@ function summary(decision, record, target) {
 export async function main(argv) {
   const options = parseArgs(argv);
   if (options.help || !options.change) {
-    console.log(`usage: node scripts/gate.mjs <change> [--gate adr|spec] [--rev N] [--static] [--timeout 900] [--port N] [--by name] [--no-open]
+    console.log(`usage: node scripts/gate.mjs <change> [--gate adr|spec|all] [--rev N] [--static] [--timeout 900] [--port N] [--by name] [--no-open]
        node scripts/gate.mjs <change> --verify
 
 Renders the change's artifacts to a page, waits for approve or request changes,
@@ -618,14 +642,15 @@ when one no longer matches the file it names.`);
   if (!dir) throw new Error(`no change named ${options.change} under openspec/changes/`);
   const collected = await collectArtifacts(ROOT, dir);
   const level = collected.level;
-  const files = arrange(selectForGate(collected.files, options.gate), options.gate === 'all' ? collected.gateKind : options.gate);
+  const gate = options.gate ?? defaultGate(collected.gateKind);
+  const files = arrange(selectForGate(collected.files, gate), gate === 'all' ? collected.gateKind : gate);
   if (!files.length) throw new Error(`${path.relative(ROOT, dir)} has no artifacts to review`);
-  if (options.gate !== 'all' && !files.some((file) => file.kind === options.gate)) {
-    throw new Error(`${path.relative(ROOT, dir)} has no ${options.gate} to gate`);
+  if (gate !== 'all' && !files.some((file) => file.kind === gate)) {
+    throw new Error(`${path.relative(ROOT, dir)} has no ${gate} to gate`);
   }
 
   const revision = options.rev;
-  const base = options.gate === 'all' ? `${options.change}-r${revision}` : `${options.change}-r${revision}-${options.gate}`;
+  const base = `${options.change}-r${revision}-${gate}`;
   await mkdir(OUT, { recursive: true });
   const pagePath = path.join(OUT, `${base}.html`);
   const jsonPath = path.join(OUT, `${base}.json`);
@@ -634,7 +659,7 @@ when one no longer matches the file it names.`);
     revision,
     level,
     files,
-    gate: options.gate,
+    gate,
     staticMode: options.static,
     idle: options.static ? 0 : options.timeout > 0 ? options.timeout : 0,
   });
@@ -722,7 +747,7 @@ when one no longer matches the file it names.`);
           change: options.change,
           revision,
           level,
-          gate: options.gate,
+          gate,
           ...checked,
           approvedBy,
           approvedAt: new Date().toISOString(),
@@ -744,9 +769,12 @@ when one no longer matches the file it names.`);
     server.listen(options.port, '127.0.0.1', () => {
       const { port } = server.address();
       const link = `http://127.0.0.1:${port}${route}/`;
-      console.log(`Gate open: ${options.change} r${revision} (${level}${options.gate === 'all' ? '' : `, ${options.gate}`}), ${files.length} artifact(s)`);
+      console.log(`Gate open: ${options.change} r${revision} (${level}, ${gate}), ${files.length} artifact(s)`);
       console.log(`Page:      ${link}`);
       if (approvedBy) console.log(`Approval:  recorded as ${approvedBy}`);
+      if (gate === 'adr' && collected.files.some((file) => file.kind === 'spec')) {
+        console.log('Next gate: --gate spec, after this one is approved.');
+      }
       console.log(
         idle
           ? `Waiting for the human. ${idle}s idle, then exit 3; the open page checks in every 10s. Ctrl-C to stop.`
