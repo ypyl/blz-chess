@@ -14,8 +14,9 @@ counts files better with clean squares than with labels in the corners).
 - Board light squares `#f0eed6`, dark squares `#7d945d`.
 - The board is square, as wide as the column allows, capped at 34rem, with a soft
   shadow so it sits on the page rather than floating.
-- Squares are separated by a one-pixel line of the board's background, so an empty
-  cell reads as a cell instead of a patch of colour.
+- Squares meet with no separator: the two colours are the only division, as on a
+  real board. Every cell is the same square whatever stands in it, which is a
+  property of the grid, not of the pieces.
 - Level list: one full-width button per level, weakest first, panel background,
   accent border on hover and focus.
 - Selected square: inset accent ring. Legal destination: a small dark dot, or a
