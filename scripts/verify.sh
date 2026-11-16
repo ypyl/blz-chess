@@ -39,6 +39,25 @@ else
 '
 fi
 
+# --- project checks --------------------------------------------------------
+
+# A file the site needs that .gitignore silently swallows never reaches the
+# published site: the build is green, the page 404s in the browser. This check
+# fails on the file, not on the symptom.
+ignored_assets=$(git ls-files -o -i --exclude-standard src/BlzChess.Web/wwwroot 2>/dev/null)
+if [[ -n "$ignored_assets" ]]; then
+  printf '
+==> Web assets: .gitignore swallows files the site needs
+'
+  printf '%s
+' "$ignored_assets" | sed 's/^/  FAIL /'
+  status=1
+else
+  printf '
+==> Web assets: every file under wwwroot is tracked
+'
+fi
+
 for step in Lint Build Test; do
   cmd=$(fact "$step")
   if [[ -z "$cmd" ]]; then

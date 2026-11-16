@@ -19,7 +19,9 @@ Thumbs.db
 # .NET build output and tooling
 bin/
 obj/
-dist/
+# Publish output at the repository root. Unanchored, this pattern also matches
+# wwwroot/lib/bootstrap/dist/, which would ship the app without any CSS.
+/dist/
 *.user
 .vs/
 *.suo
