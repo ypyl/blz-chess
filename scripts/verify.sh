@@ -41,6 +41,23 @@ fi
 
 # --- project checks --------------------------------------------------------
 
+# GitHub Pages does not serve dotfiles, so a dotfile in the site is a 404 in the
+# service worker's asset list, and one failed asset fails the whole install: the
+# app stops being installable and offline-capable.
+dotfiles=$(find src/BlzChess.Web/wwwroot -name '.*' -type f 2>/dev/null)
+if [[ -n "$dotfiles" ]]; then
+  printf '
+==> Web assets: dotfiles in the site
+'
+  printf '%s
+' "$dotfiles" | sed 's/^/  FAIL /'
+  status=1
+else
+  printf '
+==> Web assets: no dotfiles the host will not serve
+'
+fi
+
 # A file the site needs that .gitignore silently swallows never reaches the
 # published site: the build is green, the page 404s in the browser. This check
 # fails on the file, not on the symptom.
