@@ -5,4 +5,9 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
-Nothing yet.
+### Added
+
+- The app: a Blazor WebAssembly PWA shell that installs and serves a BlzChess
+  page, with a C# chess rules library and a test project behind it.
+- A pipeline that builds, tests, and publishes the site to GitHub Pages on every
+  push to `main`.

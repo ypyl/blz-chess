@@ -15,3 +15,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# .NET build output and tooling
+bin/
+obj/
+dist/
+*.user
+.vs/
+*.suo
+TestResults/
