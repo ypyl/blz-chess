@@ -1,0 +1,195 @@
+@page "/"
+@using BlzChess.Core
+@using BlzChess.Web.Engine
+@inject IEngine Engine
+
+<PageTitle>BlzChess</PageTitle>
+
+<main class="shell">
+    @if (_flow.Stage == GameStage.Choosing)
+    {
+        <section class="chooser">
+            <h1>BlzChess</h1>
+            <p class="lede">Pick an opponent. You play White.</p>
+            <ul class="levels">
+                @foreach (var level in Level.All)
+                {
+                    <li>
+                        <button type="button" class="level" @onclick="() => ChooseLevel(level)">
+                            @level.Name
+                        </button>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+    else
+    {
+        <header class="bar">
+            <span class="opponent">@_flow.Level?.Name</span>
+            <button type="button" class="ghost" @onclick="NewGame">New game</button>
+        </header>
+
+        <div class="board" role="grid" aria-label="Chess board">
+            @for (var rank = 7; rank >= 0; rank--)
+            {
+                @for (var file = 0; file < 8; file++)
+                {
+                    var square = Squares.Index(file, rank);
+                    <button type="button"
+                            class="@SquareClass(square)"
+                            aria-label="@SquareLabel(square)"
+                            aria-pressed="@(_selected == square ? "true" : "false")"
+                            @onclick="() => OnSquareAsync(square)">
+                        @if (PieceAt(square) is { } piece)
+                        {
+                            <img src="@PiecePath(piece)" alt="@PieceAlt(piece)" draggable="false" />
+                        }
+                    </button>
+                }
+            }
+        </div>
+
+        <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)">@Status</p>
+
+        @if (_flow.Stage == GameStage.Finished)
+        {
+            <button type="button" class="primary" @onclick="NewGame">New game</button>
+        }
+
+        @if (_error is not null)
+        {
+            <p class="error">@_error</p>
+        }
+    }
+</main>
+
+@code {
+    private GameFlow _flow = default!;
+    private int _selected = Squares.None;
+    private HashSet<int> _targets = [];
+    private bool _thinking;
+    private string? _error;
+
+    protected override void OnInitialized() => _flow = new GameFlow(Engine);
+
+    private string Status => _flow.Result.IsOver
+        ? _flow.Result.Describe(Color.White)
+        : _thinking ? "Thinking…" : "Your move.";
+
+    private void ChooseLevel(Level level)
+    {
+        _flow.ChooseLevel(level);
+        ClearSelection();
+        _error = null;
+    }
+
+    private void NewGame()
+    {
+        _flow.NewGame();
+        ClearSelection();
+        _thinking = false;
+        _error = null;
+    }
+
+    private void ClearSelection()
+    {
+        _selected = Squares.None;
+        _targets = [];
+    }
+
+    private Piece? PieceAt(int square) => _flow.Session?.Game.Position[square];
+
+    private string SquareClass(int square)
+    {
+        var classes = new List<string> { "square", Squares.IsLight(square) ? "light" : "dark" };
+        if (_selected == square)
+        {
+            classes.Add("selected");
+        }
+
+        if (_targets.Contains(square))
+        {
+            classes.Add("target");
+        }
+
+        if (_thinking || _flow.Stage != GameStage.Playing)
+        {
+            classes.Add("locked");
+        }
+
+        return string.Join(' ', classes);
+    }
+
+    private string SquareLabel(int square)
+    {
+        var name = Squares.Name(square);
+        return PieceAt(square) is { } piece ? $"{name}, {PieceAlt(piece)}" : $"{name}, empty";
+    }
+
+    private async Task OnSquareAsync(int square)
+    {
+        if (_flow.Session is not { } session || _flow.Stage != GameStage.Playing || _thinking)
+        {
+            return;
+        }
+
+        if (_selected != Squares.None && _targets.Contains(square))
+        {
+            var move = new Move(_selected, square, PromotionIfAny(_selected, square));
+            if (_flow.TryPlayerMove(move, out _))
+            {
+                ClearSelection();
+                await EngineReplyAsync();
+                return;
+            }
+        }
+
+        var legalFromSquare = PieceAt(square) is { } clicked
+            && clicked.Color == session.PlayerColor
+                ? session.LegalMovesFrom(square)
+                : [];
+
+        if (legalFromSquare.Count == 0)
+        {
+            ClearSelection();
+            return;
+        }
+
+        _selected = square;
+        _targets = [.. legalFromSquare.Select(move => move.To)];
+    }
+
+    private PieceType? PromotionIfAny(int from, int to)
+    {
+        var piece = PieceAt(from);
+        var lastRank = piece?.Color == Color.White ? 7 : 0;
+        return piece?.Type == PieceType.Pawn && Squares.RankOf(to) == lastRank ? PieceType.Queen : null;
+    }
+
+    private async Task EngineReplyAsync()
+    {
+        _thinking = true;
+        StateHasChanged();
+        try
+        {
+            await _flow.PlayEngineMoveAsync();
+            _error = null;
+        }
+        catch (Exception)
+        {
+            _error = "The computer stopped answering. Start a new game.";
+        }
+        finally
+        {
+            _thinking = false;
+            StateHasChanged();
+        }
+    }
+
+    private static string PiecePath(Piece piece) =>
+        $"pieces/{(piece.Color == Color.White ? 'w' : 'b')}{piece.Type.ToString()[0]}.svg";
+
+    private static string PieceAlt(Piece piece) =>
+        $"{(piece.Color == Color.White ? "white" : "black")} {piece.Type.ToString().ToLowerInvariant()}";
+}

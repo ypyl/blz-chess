@@ -12,11 +12,20 @@ on GitHub Pages.
 Not a chess platform. No ratings, no tournaments, no puzzles, no online play, no
 accounts, no analysis library. If you want chess.com or lichess, use those.
 
+## How a game goes
+
+Pick an opponent, from "No idea how to play" to "Expert", and play. You are
+White. Click a piece, click its destination, and the computer answers. The game
+says when it is over: checkmate, stalemate, repetition, the fifty-move rule, or
+insufficient material. "New game" takes you back to the level list.
+
+The weakest level plays mostly random legal moves; the strongest plays Stockfish's
+choice at depth 16. A refresh loses the game, because nothing is stored.
+
 ## Status
 
-The shell: the app builds, installs, and serves an empty board page. Chess
-arrives one change at a time, each with a spec you can read before it ships. See
-[`openspec/specs/`](openspec/specs) for what the product promises and
+Playable against Stockfish at six levels. Every change shows you a spec before it
+ships: see [`openspec/specs/`](openspec/specs) for what the product promises and
 [`CHANGELOG.md`](CHANGELOG.md) for what it does today.
 
 ## Run it
@@ -50,9 +59,11 @@ dotnet test --no-build
 ## Layout
 
 ```
-src/BlzChess.Core/          chess rules. No UI, no browser, no I/O.
+src/BlzChess.Core/          chess rules, levels, and the game session. No browser.
 src/BlzChess.Web/           Blazor WebAssembly standalone app (PWA)
-tests/BlzChess.Core.Tests/  xUnit tests for the rules
+src/BlzChess.Web/wwwroot/engine   vendored Stockfish wasm and its UCI shim
+src/BlzChess.Web/wwwroot/pieces   the Cburnett piece set
+tests/BlzChess.Core.Tests/  xUnit tests, perft included
 .github/workflows/          ci.yml on every push, deploy.yml on main
 ```
 
@@ -63,6 +74,15 @@ behavior change shows you a spec before it ships, and a contract change shows yo
 an ADR. Decisions are in [`adr/`](adr), conventions in
 [`CONVENTIONS.md`](CONVENTIONS.md), and the shape of the system in
 [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+## Credits
+
+The chess engine is [Stockfish](https://stockfishchess.org) compiled to WebAssembly
+by [stockfish.js](https://github.com/nmrugg/stockfish.js), vendored unmodified at
+`src/BlzChess.Web/wwwroot/engine` (build 19, lite network, single-threaded).
+
+The pieces are the Cburnett set from [Lichess](https://github.com/lichess-org/lila)
+(`wwwroot/pieces`), by Colin M.L. Burnett, CC BY-SA 3.0.
 
 ## Licence
 
