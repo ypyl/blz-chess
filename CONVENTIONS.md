@@ -36,9 +36,11 @@ example tests.
 
 ## Dependencies
 
-NuGet only, and `packages.lock.json` is committed and restored with
-`--locked-mode` in CI. A new package is an L2 change because it outlives the
-change that adds it.
+NuGet only. `BlzChess.Core` and the test project commit `packages.lock.json` and
+restore with `--locked-mode` in CI. `BlzChess.Web` does not: the `wasm-tools`
+workload injects SDK packs whose content hash differs between operating systems,
+so its guard is the exact SDK pin plus explicit package versions. A new package is
+an L2 change because it outlives the change that adds it.
 
 Anything vendored as a binary (the Stockfish wasm) is pinned by version and by
 sha256 recorded beside the version constant. Never loaded from a CDN at runtime,

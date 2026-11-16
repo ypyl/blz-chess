@@ -9,6 +9,13 @@
     <!-- GitHub Pages cannot negotiate per-file precompressed assets, so publish
          ships plain files and lets the CDN compress at the edge. -->
     <EnableDefaultCompressionFormats>false</EnableDefaultCompressionFormats>
+    <!-- No lock file here: the wasm-tools workload injects SDK packs whose
+         content hash differs between the Windows and Linux installs, so a lock
+         file written here fails NU1403 on the runner. The SDK pin in global.json
+         and the pinned package versions above are this project's guard.
+         shortcut: lock file off, turn it back on when the workload packs hash
+         the same across operating systems. -->
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>

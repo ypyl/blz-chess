@@ -606,7 +606,9 @@ human, not a guess.
 - Toolchain: .NET SDK 10.0.402 pinned exactly by `global.json` (`rollForward:
   disable`) and installed from that file in CI, because the SDK patch decides
   the ILLink version the lock files record;
-  NuGet with committed `packages.lock.json` and `--locked-mode` restore in CI;
+  NuGet with `packages.lock.json` for `Core` and the tests and `--locked-mode`
+  restore in CI (the web project cannot keep one: workload pack hashes differ
+  between operating systems);
   the `wasm-tools` workload for publish-time trimming; Node 22 or newer for
   `scripts/gate.mjs`
 - Trunk branch: main
