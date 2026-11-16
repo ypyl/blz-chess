@@ -42,6 +42,12 @@ jobs:
       - name: Test
         run: dotnet test -c Release --no-restore
 
+      # The site is served from a sub-path, so the shell's base href has to say so
+      # before publish, not after: the service worker records the hash of every
+      # file it caches, and a file edited after publish can never match it.
+      - name: Point the shell at the project sub-path
+        run: sed -i "s|<base href=\"/\" />|<base href=\"$BASE_PATH\" />|" src/BlzChess.Web/wwwroot/index.html
+
       - name: Publish
         run: dotnet publish src/BlzChess.Web -c Release --no-restore -o dist
 
@@ -53,8 +59,25 @@ jobs:
             exit 1
           fi
 
-      - name: Serve the shell from the project sub-path
-        run: sed -i "s|<base href=\"/\" />|<base href=\"$BASE_PATH\" />|" dist/wwwroot/index.html
+      # The service worker refuses to install when one cached file disagrees with
+      # the hash the build recorded. A shell edited after publish does exactly that.
+      - name: Verify every asset matches the hash the worker will check
+        run: |
+          node -e '
+            const fs = require("fs"), path = require("path"), crypto = require("crypto");
+            const root = "dist/wwwroot";
+            const text = fs.readFileSync(path.join(root, "service-worker-assets.js"), "utf8");
+            const manifest = JSON.parse(text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1));
+            let bad = 0;
+            for (const asset of manifest.assets) {
+              const file = path.join(root, asset.url.split("?")[0]);
+              if (!fs.existsSync(file)) { console.log("missing", asset.url); bad++; continue; }
+              const hash = "sha256-" + crypto.createHash("sha256").update(fs.readFileSync(file)).digest("base64");
+              if (hash !== asset.hash) { console.log("hash mismatch", asset.url); bad++; }
+            }
+            if (bad > 0) { console.log("::error::the service worker would fail to install"); process.exit(1); }
+            console.log("all " + manifest.assets.length + " assets match their recorded hash");
+          '
 
       # GitHub Pages answers an unknown path with 404.html. Serving the app shell
       # there is what lets a deep link reach the Blazor router.
