@@ -187,9 +187,7 @@
         }
     }
 
-    private static string PiecePath(Piece piece) =>
-        $"pieces/{(piece.Color == Color.White ? 'w' : 'b')}{piece.Type.ToString()[0]}.svg";
+    private static string PiecePath(Piece piece) => $"pieces/{PieceFiles.FileName(piece)}";
 
-    private static string PieceAlt(Piece piece) =>
-        $"{(piece.Color == Color.White ? "white" : "black")} {piece.Type.ToString().ToLowerInvariant()}";
+    private static string PieceAlt(Piece piece) => PieceFiles.AltText(piece);
 }
