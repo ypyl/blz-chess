@@ -30,7 +30,24 @@
         <span class="dismiss">🗙</span>
     </div>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+    <script>
+        // The worker activates a new build immediately and takes the open page with
+        // it, so a returning visitor is never stuck on the version they first
+        // loaded. The first install claims the page without a reload.
+        if ('serviceWorker' in navigator) {
+            const hadController = !!navigator.serviceWorker.controller;
+            let reloading = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!hadController || reloading) {
+                    return;
+                }
+                reloading = true;
+                location.reload();
+            });
+            navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' })
+                .then(registration => registration.update());
+        }
+    </script>
 </body>
 
 </html>
