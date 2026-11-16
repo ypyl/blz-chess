@@ -603,9 +603,9 @@ human, not a guess.
 - Stack: C# on .NET 10; Blazor WebAssembly standalone app (PWA); a chess rules
   class library with no UI dependency; Stockfish compiled to WebAssembly as the
   opponent; static hosting on GitHub Pages; GitHub Actions for CI and deploy
-- Toolchain: .NET SDK 10.0.402 pinned by `global.json` (`rollForward:
-  latestPatch`), and CI installs the SDK from that file, because the
-  `wasm-tools` workload decides the ILLink version the lock files record;
+- Toolchain: .NET SDK 10.0.402 pinned exactly by `global.json` (`rollForward:
+  disable`) and installed from that file in CI, because the SDK patch decides
+  the ILLink version the lock files record;
   NuGet with committed `packages.lock.json` and `--locked-mode` restore in CI;
   the `wasm-tools` workload for publish-time trimming; Node 22 or newer for
   `scripts/gate.mjs`
