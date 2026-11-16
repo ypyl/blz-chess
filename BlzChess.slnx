@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BlzChess.Core/BlzChess.Core.csproj" />
+    <Project Path="src/BlzChess.Web/BlzChess.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BlzChess.Core.Tests/BlzChess.Core.Tests.csproj" />
+  </Folder>
+</Solution>

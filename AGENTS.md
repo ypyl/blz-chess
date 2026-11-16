@@ -12,8 +12,11 @@ alone.
 
 ## What this is
 
-<One paragraph. What the product does, who it is for, and what it explicitly is
-not.>
+BlzChess is chess for casual players in one browser tab: a Blazor WebAssembly
+PWA that plays a game against Stockfish running in that same tab, with no
+account, no server, and nothing stored outside the visitor's own browser. It is
+for someone who wants a quick game, and it is explicitly not a chess platform:
+no ratings, no tournaments, no online play, no accounts, no analysis library.
 
 ## Skills
 
@@ -289,12 +292,13 @@ safe.
 
 ### How a gate is presented
 
-Run `node scripts/gate.mjs <change> --gate adr` and let it block; `--gate spec`
-for the second gate. The flag narrows the page to the artifact that gate is
-about, plus the proposal as context. Without it the page shows the whole change:
-that is for bootstrap, which has no delta spec, and for re-reading, not for a
-decision with two steps. The page and its submission live at
-`.tmp/gate/<change>-r<N>[-<gate>].html` and `.json`. It returns when the human
+Run `node scripts/gate.mjs <change>` and let it block. With no `--gate` the page
+is the change's gate: the ADR at L2 and L3, the delta spec at L1, plus the
+proposal as context. At L2 and L3 the second gate is `--gate spec`, run after the
+first is approved. `--gate all` shows the whole change, which is for re-reading,
+not for approving. A page that showed the decision and its consequences together
+would let one click approve both. The page and its submission live at
+`.tmp/gate/<change>-r<N>-<gate>.html` and `.json`. It returns when the human
 clicks Approve or Request changes: exit 0 approved, 2 changes requested, 3 no
 response. The conversation is where the human reads. The repository is where the
 record lives. The page is generated from the files, so the two cannot disagree.
@@ -594,16 +598,27 @@ Fill this in the first change, then keep it true. These are the only commands
 and names the agent may assume: a value that is missing is a question for the
 human, not a guess.
 
-- Product slug:
-- Stack:
-- Toolchain:
-- Trunk branch:
-- Lint:
-- Build:
-- Test:
-- Run:
-- Secrets:
-- Environments:
+- Product slug: blz-chess
+- Stack: C# on .NET 10; Blazor WebAssembly standalone app (PWA); a chess rules
+  class library with no UI dependency; Stockfish compiled to WebAssembly as the
+  opponent; static hosting on GitHub Pages; GitHub Actions for CI and deploy
+- Toolchain: .NET SDK 10.0.4xx pinned by `global.json` (`rollForward:
+  latestFeature`); NuGet with committed `packages.lock.json` and
+  `--locked-mode` restore in CI; the `wasm-tools` workload for publish-time
+  trimming; Node 22 or newer for `scripts/gate.mjs`
+- Trunk branch: main
+- Lint: dotnet format --verify-no-changes --no-restore
+- Build: dotnet build --no-restore -warnaserror
+- Test: dotnet test --no-build
+- Run: dotnet run --project src/BlzChess.Web
+- Repository checks: bash scripts/verify.sh (invariants, gate tests, then lint,
+  build, and test above). Needs Node 22 or newer and the .NET 10 SDK
+- Secrets: none. The app carries no keys and no `.env` file exists; the deploy
+  workflow uses the repository's `GITHUB_TOKEN` and a Pages `id-token` scoped to
+  that job, nothing else
+- Environments: local, from `dotnet run` on this machine; and GitHub Pages,
+  reached at `https://<owner>.github.io/blz-chess/` once the human creates the
+  remote and points Pages at the Actions source. No other environment exists
 - OpenSpec CLI: 1.17.0 (the only external tool; check `openspec --version`)
 - Versions: git tags `<product>-v<semver>`, cut at release. No version file.
 
@@ -636,10 +651,14 @@ changes may skip it. Put the run URL and its conclusion in the archive commit.
 Trigger and Status are written for the change branch, so merge step 5 has a run
 to read.
 
-- Trigger:
-- Wait:
-- Status:
-- Logs:
+- Trigger: `gh workflow run ci.yml --ref "$(git branch --show-current)"`
+- Wait: `gh run watch "$(gh run list --workflow=ci.yml --branch "$(git
+  branch --show-current)" --limit 1 --json databaseId --jq '.[0].databaseId')"
+  --exit-status`
+- Status: `gh run list --workflow=ci.yml --branch "$(git branch --show-current)"
+  --limit 3`
+- Logs: `gh run view --log-failed "$(gh run list --workflow=ci.yml --branch "$(git
+  branch --show-current)" --limit 1 --json databaseId --jq '.[0].databaseId')"`
 
 ### Deploy
 

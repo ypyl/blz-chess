@@ -9,7 +9,7 @@ the old one Superseded.
 
 | ADR | Title | Status |
 |---|---|---|
-| | | |
+| [0001](0001-blazor-wasm-on-github-pages.md) | Blazor WebAssembly and Stockfish, statically hosted on GitHub Pages | Accepted |
 
 ## Adding a decision
 

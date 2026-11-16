@@ -1,0 +1,68 @@
+name: deploy
+
+# Publishes the site to GitHub Pages on every push to main. The branch is the
+# gate: a pull request gets no Pages permissions and no OIDC token.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  # GitHub Pages serves a project site from a sub-path. The source keeps "/" so
+  # `dotnet run` works, and the deployed shell is rewritten to this path.
+  BASE_PATH: /blz-chess/
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install the wasm-tools workload
+        run: dotnet workload install wasm-tools
+
+      - name: Restore locked
+        run: dotnet restore --locked-mode
+
+      - name: Test
+        run: dotnet test -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish src/BlzChess.Web -c Release --no-restore -o dist
+
+      - name: Serve the shell from the project sub-path
+        run: sed -i "s|<base href=\"/\" />|<base href=\"$BASE_PATH\" />|" dist/wwwroot/index.html
+
+      # GitHub Pages answers an unknown path with 404.html. Serving the app shell
+      # there is what lets a deep link reach the Blazor router.
+      - name: Copy the shell to 404.html
+        run: cp dist/wwwroot/index.html dist/wwwroot/404.html
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/wwwroot
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
