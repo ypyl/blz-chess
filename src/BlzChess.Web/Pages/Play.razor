@@ -44,7 +44,10 @@
                             @onclick="() => OnSquareAsync(square)">
                         @if (PieceAt(square) is { } piece)
                         {
-                            <img src="@PiecePath(piece)" alt="@PieceAlt(piece)" draggable="false" />
+                            @* Decorative: the button's label already names the square and
+                               its piece, and a non-empty alt paints as text while the
+                               SVG loads, which is the flash this change removes. *@
+                            <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
                         }
                     </button>
                 }

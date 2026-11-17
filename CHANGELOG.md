@@ -17,6 +17,10 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Fixed
 
+- The board no longer flashes the words "white pawn" on its squares while the piece
+  images load: the images are decorative, the square already has a label, and the
+  twelve of them are preloaded with the page.
+
 - Knights were drawn as kings, because the piece image was chosen by the first
   letter of the piece name and Knight and King share it.
 
