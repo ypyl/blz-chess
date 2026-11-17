@@ -30,6 +30,16 @@ bold except the result line and the level name.
 The same column at 96vw. The board takes the full width, the level list keeps its
 full-width rows, and nothing needs a horizontal scroll at 390px.
 
+## The mark
+
+The icon is the knight from the same piece set, cream on the board's green, filling
+the tile so it still reads at 16 pixels in a tab. It is drawn once as
+`wwwroot/icon.svg` and rendered from that file to `icon-32.png` (tab),
+`icon-180.png` (apple-touch), `icon-192.png` and `icon-512.png` (manifest). The SVG
+is the source; the PNGs are output and can be regenerated from it at any time.
+
+No new artwork and no second identity: the app is its pieces.
+
 ## Pieces
 
 The Cburnett set, twelve files in `wwwroot/pieces` named `wK.svg`, `wN.svg`, and so
