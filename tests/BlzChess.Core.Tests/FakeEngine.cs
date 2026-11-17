@@ -21,3 +21,19 @@ internal sealed class FakeEngine : IEngine
         return Task.FromResult(move);
     }
 }
+/// <summary>An engine that answers a queued script of moves, so a game can be driven to an end.</summary>
+internal sealed class ScriptedEngine : IEngine
+{
+    private readonly Queue<string> _moves;
+
+    public ScriptedEngine(params string[] moves)
+    {
+        _moves = new Queue<string>(moves);
+    }
+
+    public Task<Move?> BestMoveAsync(string fen, Level level, CancellationToken cancellationToken = default)
+    {
+        var move = _moves.Count > 0 && Move.TryParseUci(_moves.Dequeue(), out var parsed) ? parsed : (Move?)null;
+        return Task.FromResult(move);
+    }
+}

@@ -19,7 +19,10 @@ counts files better with clean squares than with labels in the corners).
   property of the grid, not of the pieces.
 - Level list: one full-width button per level, weakest first, panel background,
   accent border on hover and focus.
-- In a game the header holds the level, the status, and New game in that order:
+- The header's action follows the state: "Restart" while a game runs (same level,
+  fresh board, no result) and "New game" once it is over (back to the level list).
+  One slot, so the header has one shape.
+- In a game the header holds the level, the status, and that action in that order:
   level name, then the message, then the button. The status slot exists in every
   state, so "Your move", "Thinking" and the result take the same room and the board
   never moves. On a phone the message gets its own row, still in every state.

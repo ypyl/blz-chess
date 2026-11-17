@@ -56,6 +56,62 @@ public class GameFlowTests
         Assert.Null(afterRefresh.Session);
     }
 
+    [Fact(DisplayName = "Restarting starts the same level again")]
+    public async Task RestartingStartsTheSameLevelAgain()
+    {
+        var flow = new GameFlow(new FakeEngine("e7e5"));
+        flow.ChooseLevel(Level.All[3]);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        await flow.PlayEngineMoveAsync();
+        var played = flow.Session!.Game.Moves.Count;
+
+        var restarted = flow.Restart();
+
+        Assert.True(restarted);
+        Assert.Equal("Casual", flow.Level?.Name);
+        Assert.Equal(GameStage.Playing, flow.Stage);
+        Assert.Equal(Fen.StartingPosition, flow.Session?.Game.Fen);
+        Assert.Equal(Color.White, flow.Session?.Game.Position.SideToMove);
+        Assert.Empty(flow.Session!.Game.Moves);
+        Assert.True(played > 0);
+    }
+
+    [Fact(DisplayName = "A restart records no result")]
+    public async Task ARestartRecordsNoResult()
+    {
+        var flow = new GameFlow(new FakeEngine("e7e5"));
+        flow.ChooseLevel(Level.All[3]);
+        var before = flow.Session;
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        await flow.PlayEngineMoveAsync();
+
+        flow.Restart();
+
+        Assert.NotSame(before, flow.Session);
+        Assert.Equal(ResultKind.InProgress, flow.Result.Kind);
+        Assert.Null(flow.Result.Winner);
+        Assert.False(flow.Result.IsOver);
+    }
+
+    [Fact(DisplayName = "Restart is offered only while a game is in progress")]
+    public async Task RestartIsOfferedOnlyWhileAGameIsInProgress()
+    {
+        var onTheLevelList = new GameFlow(new FakeEngine("e7e5"));
+        Assert.False(onTheLevelList.Restart());
+
+        // Fool's mate, driven through the flow so its stage moves as the game does.
+        var finished = new GameFlow(new ScriptedEngine("e7e5", "d8h4"));
+        finished.ChooseLevel(Level.Strongest);
+        Assert.True(finished.TryPlayerMove(new Move(Squares.Index(5, 1), Squares.Index(5, 2)), out _));
+        Assert.NotNull(await finished.PlayEngineMoveAsync());
+        Assert.True(finished.TryPlayerMove(new Move(Squares.Index(6, 1), Squares.Index(6, 3)), out _));
+        Assert.NotNull(await finished.PlayEngineMoveAsync());
+
+        Assert.Equal(ResultKind.Checkmate, finished.Result.Kind);
+        Assert.Equal(GameStage.Finished, finished.Stage);
+        Assert.False(finished.Restart());
+    }
+
     [Fact]
     public async Task TheEngineMovesAfterThePlayerAndNotBefore()
     {
