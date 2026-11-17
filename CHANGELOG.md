@@ -5,6 +5,11 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
+### Changed
+
+- The app has its own icon, a knight on the board's green, instead of the Blazor
+  logo the template shipped.
+
 ### Fixed
 
 - Knights were drawn as kings, because the piece image was chosen by the first
