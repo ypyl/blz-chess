@@ -68,6 +68,22 @@ public sealed class GameFlow
     }
 
     /// <summary>
+    /// Changes the opponent for its next move, only while a game is in progress. The
+    /// game itself is untouched.
+    /// </summary>
+    public bool ChangeLevel(Level level)
+    {
+        ArgumentNullException.ThrowIfNull(level);
+        if (Stage != GameStage.Playing || Session is null)
+        {
+            return false;
+        }
+
+        Session.ChangeLevel(level);
+        return true;
+    }
+
+    /// <summary>
     /// Starts the same level again with a fresh board, and records nothing: the game
     /// that was in progress is gone, with no result and no winner. Refused unless a
     /// game is running, because there is nothing to restart otherwise.

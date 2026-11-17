@@ -7,6 +7,10 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Added
 
+- Change the opponent level in the middle of a game. The position, the moves played,
+  and whose turn it is stay as they are; only the next computer move is chosen at the
+  new level.
+
 - Restart a game in progress: the board goes back to the start at the same level,
   and no result is recorded.
 

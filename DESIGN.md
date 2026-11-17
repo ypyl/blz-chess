@@ -22,6 +22,9 @@ counts files better with clean squares than with labels in the corners).
 - The header's action follows the state: "Restart" while a game runs (same level,
   fresh board, no result) and "New game" once it is over (back to the level list).
   One slot, so the header has one shape.
+- The level is a list while a game runs, so the opponent can be changed without
+  losing the position. Once the game is over it is a plain label: the choice no
+  longer does anything, and pretending otherwise would be a trap.
 - In a game the header holds the level, the status, and that action in that order:
   level name, then the message, then the button. The status slot exists in every
   state, so "Your move", "Thinking" and the result take the same room and the board

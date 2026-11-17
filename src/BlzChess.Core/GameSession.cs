@@ -18,7 +18,7 @@ public sealed class GameSession
         Game = new Game();
     }
 
-    public Level Level { get; }
+    public Level Level { get; private set; }
 
     public Game Game { get; }
 
@@ -27,6 +27,16 @@ public sealed class GameSession
     public bool IsEngineThinking { get; private set; }
 
     public GameResult Result => Game.Result;
+
+    /// <summary>
+    /// Changes the opponent for its next move. The position, the moves played, and
+    /// the side to move are none of this method's business, which is the point: a
+    /// player who has misjudged the level keeps the game.
+    /// </summary>
+    public void ChangeLevel(Level level)
+    {
+        Level = level ?? throw new ArgumentNullException(nameof(level));
+    }
 
     public string Fen => Game.Fen;
 
