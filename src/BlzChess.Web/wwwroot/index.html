@@ -12,6 +12,20 @@
     <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
     <link href="manifest.webmanifest" rel="manifest" />
+    <!-- The board can appear before these have ever been requested. Loading them
+         with the page means the first board paints complete, with no empty squares. -->
+    <link rel="preload" as="image" href="pieces/wP.svg" />
+    <link rel="preload" as="image" href="pieces/wN.svg" />
+    <link rel="preload" as="image" href="pieces/wB.svg" />
+    <link rel="preload" as="image" href="pieces/wR.svg" />
+    <link rel="preload" as="image" href="pieces/wQ.svg" />
+    <link rel="preload" as="image" href="pieces/wK.svg" />
+    <link rel="preload" as="image" href="pieces/bP.svg" />
+    <link rel="preload" as="image" href="pieces/bN.svg" />
+    <link rel="preload" as="image" href="pieces/bB.svg" />
+    <link rel="preload" as="image" href="pieces/bR.svg" />
+    <link rel="preload" as="image" href="pieces/bQ.svg" />
+    <link rel="preload" as="image" href="pieces/bK.svg" />
     <script type="importmap"></script>
 </head>
 
