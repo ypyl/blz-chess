@@ -32,17 +32,47 @@
 <body>
     <div id="app">
         <div class="loading" role="progressbar" aria-label="Loading BlzChess">
-            <img class="loading-mark" src="icon.svg" alt="" aria-hidden="true" />
-            <div class="loading-rank">
-                <span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span>
-                <div class="loading-fill" aria-hidden="true">
-                    <span></span><span></span><span></span><span></span>
-                    <span></span><span></span><span></span><span></span>
-                </div>
+            <div class="loading-board" aria-hidden="true">
+                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
+                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
+                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
+                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
+                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
+                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
+                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
+                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
             </div>
             <p class="loading-text"></p>
         </div>
+        <script>
+            // The board fills one square at a time as the runtime arrives. Blazor
+            // publishes its progress as a custom property on the document, and this
+            // loop stops the moment Blazor replaces the loading markup.
+            (function () {
+                const board = document.querySelector('.loading-board');
+                if (!board) {
+                    return;
+                }
+
+                const cells = Array.from(board.children);
+                const tick = () => {
+                    if (!board.isConnected) {
+                        return;
+                    }
+
+                    const raw = getComputedStyle(document.documentElement).getPropertyValue('--blazor-load-percentage');
+                    const percentage = parseFloat(raw);
+                    const filled = Number.isFinite(percentage) ? Math.round((percentage / 100) * cells.length) : 0;
+                    for (let index = 0; index < cells.length; index++) {
+                        cells[index].classList.toggle('filled', index < filled);
+                    }
+
+                    requestAnimationFrame(tick);
+                };
+
+                requestAnimationFrame(tick);
+            })();
+        </script>
     </div>
 
     <div id="blazor-error-ui">

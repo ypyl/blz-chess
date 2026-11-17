@@ -7,6 +7,7 @@
     --board-light: #f0eed6;
     --board-dark: #7d945d;
     --accent: #e8c25a;
+    --accent-deep: #c39a35;
 }
 
 html,
@@ -286,9 +287,9 @@ a {
     content: "An error has occurred.";
 }
 
-/* The loading screen: the app's own mark over a rank of the board that fills as
-   the runtime arrives, so the wait looks like the product. Blazor publishes its
-   progress as --blazor-load-percentage and --blazor-load-percentage-text on :root. */
+/* The loading screen is the board itself, filling one square at a time as the
+   runtime arrives. The squares are the board's own two colours and the filled ones
+   take the accent, so the wait looks like the product instead of a spinner. */
 .loading {
     position: fixed;
     inset: 0;
@@ -299,67 +300,36 @@ a {
     padding: 1.5rem;
 }
 
-.loading-mark {
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 10px 24px rgb(0 0 0 / 35%);
-    animation: loading-bob 1.4s ease-in-out infinite;
-}
-
-@keyframes loading-bob {
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-4px);
-    }
-}
-
-.loading-rank {
-    position: relative;
+.loading-board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 2px;
-    width: min(64vw, 13rem);
+    width: min(56vw, 10.5rem);
+    border-radius: 0.4rem;
+    overflow: hidden;
 }
 
-.loading-rank > span,
-.loading-fill > span {
+.loading-board span {
     aspect-ratio: 1;
+    transition: background-color 0.18s ease-out;
 }
 
-.loading-rank > span:nth-child(odd) {
+.loading-board .light {
     background: var(--board-light);
 }
 
-.loading-rank > span:nth-child(even) {
+.loading-board .dark {
     background: var(--board-dark);
 }
 
-.loading-rank > span:first-child {
-    border-radius: 0.3rem 0 0 0.3rem;
-}
-
-.loading-rank > span:nth-child(8) {
-    border-radius: 0 0.3rem 0.3rem 0;
-}
-
-/* The fill is the same rank in the accent colour, revealed left to right by the
-   percentage Blazor sets on the document. */
-.loading-fill {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
-    clip-path: inset(0 calc(100% - var(--blazor-load-percentage, 0%)) 0 0);
-}
-
-.loading-fill > span {
+/* Filled squares keep the board's alternation, in two shades of the accent, so the
+   filled half still reads as a chess board and not as a slab. */
+.loading-board span.filled.light {
     background: var(--accent);
+}
+
+.loading-board span.filled.dark {
+    background: var(--accent-deep);
 }
 
 .loading-text {
@@ -371,13 +341,7 @@ a {
 
 .loading-text::after {
     content: var(--blazor-load-percentage-text, "Loading");
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .loading-mark {
-        animation: none;
-    }
-}}
+}}}
 
 @media (max-width: 30rem) {
     h1 {
