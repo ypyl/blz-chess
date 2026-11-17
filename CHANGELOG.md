@@ -5,6 +5,11 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
+### Added
+
+- Restart a game in progress: the board goes back to the start at the same level,
+  and no result is recorded.
+
 ### Changed
 
 - The app has its own icon, a knight on the board's green, instead of the Blazor

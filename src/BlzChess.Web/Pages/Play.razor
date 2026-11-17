@@ -28,7 +28,7 @@
         <header class="bar">
             <span class="opponent" title="@_flow.Level?.Name">@_flow.Level?.Name</span>
             <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
-            <button type="button" class="ghost" @onclick="NewGame">New game</button>
+            <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
         </header>
 
         <div class="board" role="grid" aria-label="Chess board">
@@ -67,6 +67,8 @@
 
     protected override void OnInitialized() => _flow = new GameFlow(Engine);
 
+    private string HeaderActionLabel => _flow.Stage == GameStage.Finished ? "New game" : "Restart";
+
     private string Status => _flow.Result.IsOver
         ? _flow.Result.Describe(Color.White)
         : _thinking ? "Thinking…" : "Your move.";
@@ -76,6 +78,26 @@
         _flow.ChooseLevel(level);
         ClearSelection();
         _error = null;
+    }
+
+    /// <summary>
+    /// The header has one action: restart while playing, start over from the level
+    /// list once the game is done. Two buttons would come and go and move the board.
+    /// </summary>
+    private void HeaderAction()
+    {
+        if (_flow.Stage == GameStage.Finished)
+        {
+            NewGame();
+            return;
+        }
+
+        if (_flow.Restart())
+        {
+            ClearSelection();
+            _thinking = false;
+            _error = null;
+        }
     }
 
     private void NewGame()

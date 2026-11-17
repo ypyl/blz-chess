@@ -67,6 +67,22 @@ public sealed class GameFlow
         return move;
     }
 
+    /// <summary>
+    /// Starts the same level again with a fresh board, and records nothing: the game
+    /// that was in progress is gone, with no result and no winner. Refused unless a
+    /// game is running, because there is nothing to restart otherwise.
+    /// </summary>
+    public bool Restart()
+    {
+        if (Stage != GameStage.Playing || Session is null)
+        {
+            return false;
+        }
+
+        ChooseLevel(Session.Level);
+        return true;
+    }
+
     /// <summary>Back to the level list, with no game in progress.</summary>
     public void NewGame()
     {
