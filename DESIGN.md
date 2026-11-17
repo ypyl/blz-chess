@@ -19,6 +19,10 @@ counts files better with clean squares than with labels in the corners).
   property of the grid, not of the pieces.
 - Level list: one full-width button per level, weakest first, panel background,
   accent border on hover and focus.
+- In a game the header holds the level, the status, and New game in that order:
+  level name, then the message, then the button. The status slot exists in every
+  state, so "Your move", "Thinking" and the result take the same room and the board
+  never moves. On a phone the message gets its own row, still in every state.
 - Selected square: inset accent ring. Legal destination: a small dark dot, or a
   ring when the destination holds a piece.
 

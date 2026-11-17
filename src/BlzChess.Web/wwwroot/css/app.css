@@ -86,15 +86,22 @@ a {
 
 /* Game bar */
 
+/* The status lives in the header, in a slot that exists in every state, so the
+   result never pushes the board down. The middle column takes the pressure:
+   level name and button keep their size, the message loses, not the layout. */
 .bar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
+    min-height: 2.5rem;
 }
 
 .opponent {
     font-weight: 600;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .ghost {
@@ -105,6 +112,10 @@ a {
     color: var(--muted);
     font: inherit;
     cursor: pointer;
+}
+
+.bar .ghost {
+    justify-self: end;
 }
 
 .ghost:hover,
@@ -189,25 +200,16 @@ a {
 
 .status {
     margin: 0;
-    min-height: 1.5rem;
+    text-align: center;
     color: var(--muted);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .status.over {
     color: var(--accent);
     font-weight: 600;
-}
-
-.primary {
-    align-self: flex-start;
-    padding: 0.8rem 1.2rem;
-    border: 0;
-    border-radius: 0.6rem;
-    background: var(--accent);
-    color: #241f14;
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
 }
 
 .error {
@@ -290,5 +292,28 @@ a {
 
     .shell {
         width: 96vw;
+    }
+
+    /* Two rows on a phone, in every state, so the message gets the full width
+       without the level name and the button fighting it for space. */
+    .bar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "level button"
+            "status status";
+        row-gap: 0.35rem;
+    }
+
+    .opponent {
+        grid-area: level;
+    }
+
+    .status {
+        grid-area: status;
+        text-align: left;
+    }
+
+    .bar .ghost {
+        grid-area: button;
     }
 }

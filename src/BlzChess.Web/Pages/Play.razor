@@ -26,7 +26,8 @@
     else
     {
         <header class="bar">
-            <span class="opponent">@_flow.Level?.Name</span>
+            <span class="opponent" title="@_flow.Level?.Name">@_flow.Level?.Name</span>
+            <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
             <button type="button" class="ghost" @onclick="NewGame">New game</button>
         </header>
 
@@ -49,13 +50,6 @@
                 }
             }
         </div>
-
-        <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)">@Status</p>
-
-        @if (_flow.Stage == GameStage.Finished)
-        {
-            <button type="button" class="primary" @onclick="NewGame">New game</button>
-        }
 
         @if (_error is not null)
         {
