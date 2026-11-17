@@ -42,11 +42,15 @@ full-width rows, and nothing needs a horizontal scroll at 390px.
 
 ## The loading screen
 
-Before the app boots, the page shows its own mark over one rank of the board, with
-the percentage underneath. The rank fills left to right as the runtime arrives, in
-the accent colour, and the mark bobs gently; `prefers-reduced-motion` stops the bob.
-Blazor publishes its progress as two custom properties on the document, so the rank
-and the number need no script of ours.
+Before the app boots, the page shows a full board filling in: one square at a time,
+in two shades of the accent, over the board's own cream and green, with the
+percentage underneath. The filled half keeps the checker alternation, so progress
+reads as a board being played into rather than a solid slab.
+
+Blazor publishes its progress as a custom property on the document. A short inline
+loop reads it, fills that share of the sixty-four squares, and stops the moment
+Blazor replaces the loading markup. Nothing else is downloaded for this: the
+squares are CSS.
 
 The elements are the page's own markup in `index.html`, not a component: Blazor
 replaces that subtree when it takes over, which is exactly when the wait ends.
