@@ -37,6 +37,17 @@ bold except the result line and the level name.
 The same column at 96vw. The board takes the full width, the level list keeps its
 full-width rows, and nothing needs a horizontal scroll at 390px.
 
+## The loading screen
+
+Before the app boots, the page shows its own mark over one rank of the board, with
+the percentage underneath. The rank fills left to right as the runtime arrives, in
+the accent colour, and the mark bobs gently; `prefers-reduced-motion` stops the bob.
+Blazor publishes its progress as two custom properties on the document, so the rank
+and the number need no script of ours.
+
+The elements are the page's own markup in `index.html`, not a component: Blazor
+replaces that subtree when it takes over, which is exactly when the wait ends.
+
 ## The mark
 
 The icon is the knight from the same piece set, cream on the board's green, filling
