@@ -304,14 +304,28 @@ a {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     gap: 2px;
-    width: min(56vw, 10.5rem);
+    width: min(76vw, 20rem);
     border-radius: 0.4rem;
     overflow: hidden;
 }
 
 .loading-board span {
+    display: grid;
+    place-items: center;
     aspect-ratio: 1;
-    transition: background-color 0.18s ease-out;
+}
+
+.loading-board span img {
+    width: 92%;
+    height: 92%;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.loading-board span.spawned img {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .loading-board .light {
@@ -320,16 +334,6 @@ a {
 
 .loading-board .dark {
     background: var(--board-dark);
-}
-
-/* Filled squares keep the board's alternation, in two shades of the accent, so the
-   filled half still reads as a chess board and not as a slab. */
-.loading-board span.filled.light {
-    background: var(--accent);
-}
-
-.loading-board span.filled.dark {
-    background: var(--accent-deep);
 }
 
 .loading-text {

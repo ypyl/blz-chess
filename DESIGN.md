@@ -42,15 +42,16 @@ full-width rows, and nothing needs a horizontal scroll at 390px.
 
 ## The loading screen
 
-Before the app boots, the page shows a full board filling in: one square at a time,
-in two shades of the accent, over the board's own cream and green, with the
-percentage underneath. The filled half keeps the checker alternation, so progress
-reads as a board being played into rather than a solid slab.
+Before the app boots, the page shows the board being set up: an empty board of the
+app's cream and green, and the thirty-two pieces arriving one at a time from the
+white back rank outward, with the percentage underneath. At the end the board is
+set, which is the position the game starts from, so the loading screen and the game
+share one picture.
 
 Blazor publishes its progress as a custom property on the document. A short inline
-loop reads it, fills that share of the sixty-four squares, and stops the moment
-Blazor replaces the loading markup. Nothing else is downloaded for this: the
-squares are CSS.
+loop reads it, places that share of the thirty-two pieces, and stops the moment
+Blazor replaces the loading markup. The pieces are the ones already preloaded for
+the board, so nothing extra is fetched.
 
 The elements are the page's own markup in `index.html`, not a component: Blazor
 replaces that subtree when it takes over, which is exactly when the wait ends.
