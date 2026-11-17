@@ -250,40 +250,98 @@ a {
     content: "An error has occurred.";
 }
 
-.loading-progress {
+/* The loading screen: the app's own mark over a rank of the board that fills as
+   the runtime arrives, so the wait looks like the product. Blazor publishes its
+   progress as --blazor-load-percentage and --blazor-load-percentage-text on :root. */
+.loading {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+
+.loading-mark {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 24px rgb(0 0 0 / 35%);
+    animation: loading-bob 1.4s ease-in-out infinite;
+}
+
+@keyframes loading-bob {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.loading-rank {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    width: min(64vw, 13rem);
+}
+
+.loading-rank > span,
+.loading-fill > span {
+    aspect-ratio: 1;
+}
+
+.loading-rank > span:nth-child(odd) {
+    background: var(--board-light);
+}
+
+.loading-rank > span:nth-child(even) {
+    background: var(--board-dark);
+}
+
+.loading-rank > span:first-child {
+    border-radius: 0.3rem 0 0 0.3rem;
+}
+
+.loading-rank > span:nth-child(8) {
+    border-radius: 0 0.3rem 0.3rem 0;
+}
+
+/* The fill is the same rank in the accent colour, revealed left to right by the
+   percentage Blazor sets on the document. */
+.loading-fill {
     position: absolute;
-    display: block;
-    width: 8rem;
-    height: 8rem;
-    inset: 20vh 0 auto;
-    margin: 0 auto;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    clip-path: inset(0 calc(100% - var(--blazor-load-percentage, 0%)) 0 0);
 }
 
-.loading-progress circle {
-    fill: none;
-    stroke: var(--line);
-    stroke-width: 0.6rem;
-    transform-origin: 50% 50%;
-    transform: rotate(-90deg);
+.loading-fill > span {
+    background: var(--accent);
 }
 
-.loading-progress circle:last-child {
-    stroke: var(--accent);
-    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-    transition: stroke-dasharray 0.05s ease-in-out;
-}
-
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
+.loading-text {
+    margin: 0;
     color: var(--muted);
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
 }
 
-.loading-progress-text::after {
+.loading-text::after {
     content: var(--blazor-load-percentage-text, "Loading");
 }
+
+@media (prefers-reduced-motion: reduce) {
+    .loading-mark {
+        animation: none;
+    }
+}}
 
 @media (max-width: 30rem) {
     h1 {
