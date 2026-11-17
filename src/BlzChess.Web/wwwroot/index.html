@@ -33,14 +33,14 @@
     <div id="app">
         <div class="loading" role="progressbar" aria-label="Loading BlzChess">
             <div class="loading-board" aria-hidden="true">
-                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
+                <span class="dark" data-order="25"><img src="pieces/bR.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="26"><img src="pieces/bN.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="27"><img src="pieces/bB.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="28"><img src="pieces/bQ.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="29"><img src="pieces/bK.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="30"><img src="pieces/bB.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="31"><img src="pieces/bN.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="32"><img src="pieces/bR.svg" alt="" aria-hidden="true" /></span>
+                <span class="light" data-order="17"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="18"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="19"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="20"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="21"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="22"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="23"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="24"><img src="pieces/bP.svg" alt="" aria-hidden="true" /></span>
                 <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
                 <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
                 <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
                 <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
-                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
-                <span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span>
-                <span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span><span class="dark"></span><span class="light"></span>
+                <span class="dark" data-order="9"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="10"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="11"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="12"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="13"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="14"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="15"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="16"><img src="pieces/wP.svg" alt="" aria-hidden="true" /></span>
+                <span class="light" data-order="1"><img src="pieces/wR.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="2"><img src="pieces/wN.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="3"><img src="pieces/wB.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="4"><img src="pieces/wQ.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="5"><img src="pieces/wK.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="6"><img src="pieces/wB.svg" alt="" aria-hidden="true" /></span><span class="light" data-order="7"><img src="pieces/wN.svg" alt="" aria-hidden="true" /></span><span class="dark" data-order="8"><img src="pieces/wR.svg" alt="" aria-hidden="true" /></span>
             </div>
             <p class="loading-text"></p>
         </div>
@@ -62,9 +62,11 @@
 
                     const raw = getComputedStyle(document.documentElement).getPropertyValue('--blazor-load-percentage');
                     const percentage = parseFloat(raw);
-                    const filled = Number.isFinite(percentage) ? Math.round((percentage / 100) * cells.length) : 0;
-                    for (let index = 0; index < cells.length; index++) {
-                        cells[index].classList.toggle('filled', index < filled);
+                    // Thirty-two pieces are placed, so the board ends up set.
+                    const placed = Number.isFinite(percentage) ? Math.round((percentage / 100) * 32) : 0;
+                    for (const cell of cells) {
+                        const order = Number(cell.dataset.order ?? 0);
+                        cell.classList.toggle('spawned', order > 0 && order <= placed);
                     }
 
                     requestAnimationFrame(tick);
