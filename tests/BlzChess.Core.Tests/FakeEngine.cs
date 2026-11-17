@@ -14,9 +14,12 @@ internal sealed class FakeEngine : IEngine
 
     public int Calls { get; private set; }
 
+    public Level? LastLevel { get; private set; }
+
     public Task<Move?> BestMoveAsync(string fen, Level level, CancellationToken cancellationToken = default)
     {
         Calls++;
+        LastLevel = level;
         var move = _uci is not null && Move.TryParseUci(_uci, out var parsed) ? parsed : (Move?)null;
         return Task.FromResult(move);
     }

@@ -26,7 +26,17 @@
     else
     {
         <header class="bar">
-            <span class="opponent" title="@_flow.Level?.Name">@_flow.Level?.Name</span>
+            <select @key="_flow.Level?.Index"
+                    class="level-select"
+                    aria-label="Opponent level"
+                    value="@_flow.Level?.Index"
+                    disabled="@(_flow.Stage != GameStage.Playing)"
+                    @onchange="OnLevelChanged">
+                @foreach (var level in Level.All)
+                {
+                    <option value="@level.Index">@level.Name</option>
+                }
+            </select>
             <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
             <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
         </header>
@@ -75,6 +85,18 @@
     private string Status => _flow.Result.IsOver
         ? _flow.Result.Describe(Color.White)
         : _thinking ? "Thinking…" : "Your move.";
+
+    /// <summary>
+    /// Changes the opponent without touching the game. Refused by the flow unless a
+    /// game is in progress, which is when the list is enabled.
+    /// </summary>
+    private void OnLevelChanged(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var index) && _flow.ChangeLevel(Level.ByIndex(index)))
+        {
+            _error = null;
+        }
+    }
 
     private void ChooseLevel(Level level)
     {

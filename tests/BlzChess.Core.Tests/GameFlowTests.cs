@@ -112,6 +112,66 @@ public class GameFlowTests
         Assert.False(finished.Restart());
     }
 
+    [Fact(DisplayName = "Changing the level keeps the position")]
+    public async Task ChangingTheLevelKeepsThePosition()
+    {
+        var flow = new GameFlow(new FakeEngine("e7e5"));
+        flow.ChooseLevel(Level.All[3]);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        await flow.PlayEngineMoveAsync();
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(3, 1), Squares.Index(3, 3)), out _));
+
+        var before = flow.Session!.Game.Fen;
+        var moves = flow.Session.Game.Moves.Count;
+        var toMove = flow.Session.Game.Position.SideToMove;
+
+        var changed = flow.ChangeLevel(Level.Strongest);
+
+        Assert.True(changed);
+        Assert.Equal("Expert", flow.Level?.Name);
+        Assert.Equal(before, flow.Session!.Game.Fen);
+        Assert.Equal(moves, flow.Session.Game.Moves.Count);
+        Assert.Equal(toMove, flow.Session.Game.Position.SideToMove);
+        Assert.Equal(GameStage.Playing, flow.Stage);
+    }
+
+    [Fact(DisplayName = "The new level answers")]
+    public async Task TheNewLevelAnswers()
+    {
+        var engine = new FakeEngine("e7e5");
+        var flow = new GameFlow(engine);
+        // A level with no random share, so the engine is the one asked every time.
+        flow.ChooseLevel(Level.All[4]);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        await flow.PlayEngineMoveAsync();
+        Assert.Equal("Club player", engine.LastLevel?.Name);
+
+        flow.ChangeLevel(Level.Strongest);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(3, 1), Squares.Index(3, 3)), out _));
+        await flow.PlayEngineMoveAsync();
+
+        Assert.Equal("Expert", engine.LastLevel?.Name);
+    }
+
+    [Fact]
+    public async Task ChangingTheLevelIsOfferedOnlyWhileAGameIsInProgress()
+    {
+        var onTheLevelList = new GameFlow(new FakeEngine("e7e5"));
+        Assert.False(onTheLevelList.ChangeLevel(Level.Strongest));
+
+        // Fool's mate through the flow, so the stage really reaches Finished.
+        var finished = new GameFlow(new ScriptedEngine("e7e5", "d8h4"));
+        finished.ChooseLevel(Level.Strongest);
+        Assert.True(finished.TryPlayerMove(new Move(Squares.Index(5, 1), Squares.Index(5, 2)), out _));
+        Assert.NotNull(await finished.PlayEngineMoveAsync());
+        Assert.True(finished.TryPlayerMove(new Move(Squares.Index(6, 1), Squares.Index(6, 3)), out _));
+        Assert.NotNull(await finished.PlayEngineMoveAsync());
+
+        Assert.Equal(GameStage.Finished, finished.Stage);
+        Assert.False(finished.ChangeLevel(Level.Weakest));
+        Assert.Equal("Expert", finished.Level?.Name);
+    }
+
     [Fact]
     public async Task TheEngineMovesAfterThePlayerAndNotBefore()
     {
