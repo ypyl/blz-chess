@@ -47,6 +47,12 @@ counts files better with clean squares than with labels in the corners).
   page: a taken black piece on a near-black page is a black shape on black, which is
   how it shipped once. A black piece reads at 17.9:1 on the shelf, and a white piece
   keeps the dark outline its artwork carries. `verify.sh` holds that ratio.
+- A "Hints" switch in the header turns on a suggested move: the engine's best move for
+  the player, drawn as a dashed, thinner, dimmer version of the same arrow, so "it
+  played there" and "you could play there" cannot be confused, including for a reader
+  who cannot separate the two colours. Asked at the coach's strength, never the
+  opponent's. The switch is off on load and not remembered; a hidden line names the
+  move for a screen reader, because an arrow says nothing aloud.
 - A piece can be picked up and dropped on its destination. Pressing one of the
   player's own pieces takes hold of it once the pointer has travelled 6 CSS pixels,
   and its legal destinations light up while it travels; letting go on one plays the
