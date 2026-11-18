@@ -14,7 +14,7 @@ accounts, no analysis library. If you want chess.com or lichess, use those.
 
 ## How a game goes
 
-Pick an opponent, from "No idea how to play" to "Expert", and play. You are
+Pick an opponent, from "Random" to "Expert", and play. You are
 White. Click a piece, click its destination, and the computer answers. The game
 says when it is over: checkmate, stalemate, repetition, the fifty-move rule, or
 insufficient material. "New game" takes you back to the level list.

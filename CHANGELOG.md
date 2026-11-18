@@ -20,6 +20,9 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Changed
 
+- The levels are called Random, Learner, Beginner, Casual, Club, and Expert. The old
+  "No idea how to play" made the dropdown as wide as a sentence and took the room the
+  buttons needed. Nothing about how they play changed.
 - The app starts a game as soon as it opens, at the weakest level, instead of asking
   for a level first. "New game" after a result starts a fresh game at the level shown,
   and the level list in the header can change the opponent at any time.

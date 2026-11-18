@@ -10,18 +10,18 @@ public sealed record Level(int Index, string Name, int SkillLevel, int Depth, in
     /// <summary>The ladder, weakest first. Order is the page's order and the spec's order.</summary>
     public static IReadOnlyList<Level> All { get; } =
     [
-        new(1, "No idea how to play", SkillLevel: 0, Depth: 1, MoveTimeMs: 100, RandomChance: 0.80),
-        new(2, "Just learning", SkillLevel: 0, Depth: 2, MoveTimeMs: 150, RandomChance: 0.50),
+        new(1, "Random", SkillLevel: 0, Depth: 1, MoveTimeMs: 100, RandomChance: 0.80),
+        new(2, "Learner", SkillLevel: 0, Depth: 2, MoveTimeMs: 150, RandomChance: 0.50),
         new(3, "Beginner", SkillLevel: 1, Depth: 4, MoveTimeMs: 200, RandomChance: 0.25),
         new(4, "Casual", SkillLevel: 5, Depth: 6, MoveTimeMs: 400, RandomChance: 0.05),
-        new(5, "Club player", SkillLevel: 12, Depth: 10, MoveTimeMs: 800, RandomChance: 0.0),
+        new(5, "Club", SkillLevel: 12, Depth: 10, MoveTimeMs: 800, RandomChance: 0.0),
         new(6, "Expert", SkillLevel: 20, Depth: 16, MoveTimeMs: 1500, RandomChance: 0.0),
     ];
 
     /// <summary>
     /// The strength a question is answered at, never a level the page offers. A hint
     /// asked at the opponent's level would sometimes recommend the blunder that makes
-    /// "No idea how to play" feel like a first game. Depth is modest because the answer
+    /// "Random" feel like a first game. Depth is modest because the answer
     /// is drawn while the player waits.
     /// </summary>
     public static Level Coach { get; } =

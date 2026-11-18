@@ -9,9 +9,9 @@ public class LevelTests
     {
         Assert.Equal(6, Level.All.Count);
         Assert.Equal(
-            ["No idea how to play", "Just learning", "Beginner", "Casual", "Club player", "Expert"],
+            ["Random", "Learner", "Beginner", "Casual", "Club", "Expert"],
             Level.All.Select(level => level.Name));
-        Assert.Equal("No idea how to play", Level.Weakest.Name);
+        Assert.Equal("Random", Level.Weakest.Name);
         Assert.Equal("Expert", Level.Strongest.Name);
     }
 
