@@ -5,23 +5,6 @@ TBD - created by archiving change play-against-stockfish. Update Purpose after a
 
 ## Requirements
 
-### Requirement: The page asks for a level before the first move
-
-The app SHALL open on one page that lists the opponent levels from weakest to
-strongest and SHALL start no game until one is chosen. The levels SHALL be named,
-in this order: "No idea how to play", "Just learning", "Beginner", "Casual",
-"Club player", "Expert".
-
-#### Scenario: the page opens on the level list
-
-- **WHEN** the app loads
-- **THEN** the page shows the six level names and no game in progress
-
-#### Scenario: choosing a level starts a game
-
-- **WHEN** the player chooses "Casual"
-- **THEN** the board appears with White to move and the page names the chosen level
-
 ### Requirement: The player moves pieces on the board
 
 The app SHALL let the player select a piece and a destination square, SHALL
@@ -61,23 +44,6 @@ random seed.
 - **WHEN** the level is "Expert"
 - **THEN** the reply is the engine's best move for that position
 
-### Requirement: The game ends and states the result
-
-The app SHALL detect checkmate, stalemate, threefold repetition, the fifty-move
-rule, and insufficient material, SHALL accept no further moves once one applies,
-and SHALL name the result on the page. A "New game" action SHALL return the page
-to the level list.
-
-#### Scenario: checkmate ends the game
-
-- **WHEN** the player delivers checkmate
-- **THEN** the page states that the player won and the board accepts no further moves
-
-#### Scenario: a new game asks for a level again
-
-- **WHEN** the player chooses "New game" after a result
-- **THEN** the page shows the level list and no board in play
-
 ### Requirement: Nothing leaves the browser
 
 The game SHALL run entirely in the browser tab, SHALL send no position, move, or
@@ -87,14 +53,14 @@ SHALL only ever be Stockfish.
 #### Scenario: a refresh loses the game
 
 - **WHEN** the player reloads the page mid-game
-- **THEN** the page shows the level list and no game in progress
+- **THEN** the page shows the starting position at the weakest level, and the moves from before the reload are gone
 
 ### Requirement: The player can restart the game in progress
 
 While a game is in progress the page SHALL offer a restart, and restarting SHALL
 replace the game with a fresh one at the same level with White to move, and SHALL
 record no result. Once a game has finished the page SHALL offer a new game instead,
-which returns to the level list.
+which starts a fresh game at the level shown.
 
 #### Scenario: restarting starts the same level again
 
@@ -108,7 +74,7 @@ which returns to the level list.
 
 #### Scenario: restart is offered only while a game is in progress
 
-- **WHEN** the page shows the level list, or a game has finished
+- **WHEN** a game has finished
 - **THEN** the page offers no restart
 
 ### Requirement: The player can change the opponent level during a game
@@ -127,3 +93,31 @@ level now in play.
 
 - **WHEN** the player changes the level and the computer moves next
 - **THEN** that move is chosen at the level just chosen
+
+### Requirement: The app starts a game as soon as it loads
+
+The app SHALL start a game when it loads, at the weakest level, "No idea how to
+play", with White to move, and SHALL NOT ask the player to choose a level before the
+first move. The page SHALL name the level in play.
+
+#### Scenario: the app starts a game on load
+
+- **WHEN** the app loads
+- **THEN** the board shows the starting position with White to move and the level reads "No idea how to play"
+
+### Requirement: The game ends and names the result
+
+The app SHALL detect checkmate, stalemate, threefold repetition, the fifty-move
+rule, and insufficient material, SHALL accept no further moves once one applies,
+and SHALL name the result on the page. A "New game" action SHALL start a new game at
+the level shown, with no result carried over.
+
+#### Scenario: checkmate ends the game
+
+- **WHEN** the player delivers checkmate
+- **THEN** the page states that the player won and the board accepts no further moves
+
+#### Scenario: a new game starts again at the same level
+
+- **WHEN** the player chooses "New game" after a result
+- **THEN** the board shows the starting position with White to move, and the level still reads the same name
