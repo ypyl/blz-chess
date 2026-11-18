@@ -624,6 +624,10 @@ human, not a guess.
 - Environments: local, from `dotnet run` on this machine; and GitHub Pages,
   reached at `https://<owner>.github.io/blz-chess/` once the human creates the
   remote and points Pages at the Actions source. No other environment exists
+
+  The `github-pages` environment carries a branch policy that allows the trunk branch and
+  nothing else. Renaming trunk moves the policy with it or the deploy job fails before its
+  first step, with no log: `.github/workflows/deploy.yml` is not where that is written.
 - OpenSpec CLI: 1.17.0 (the only external tool; check `openspec --version`)
 - Versions: git tags `<product>-v<semver>`, cut at release. No version file.
 
