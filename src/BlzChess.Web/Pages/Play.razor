@@ -17,7 +17,6 @@
                 <option value="@level.Index">@level.Name</option>
             }
         </select>
-        <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
         <div class="actions">
             @if (_flow.Stage == GameStage.Playing)
             {
@@ -54,6 +53,8 @@
             }
         }
     </div>
+
+    <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
 
     @if (_error is not null)
     {

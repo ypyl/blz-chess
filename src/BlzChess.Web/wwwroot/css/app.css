@@ -56,12 +56,12 @@ a {
 
 /* Game bar */
 
-/* The status lives in the header, in a slot that exists in every state, so the
-   result never pushes the board down. The middle column takes the pressure:
-   level name and button keep their size, the message loses, not the layout. */
+/* The header holds the level and the actions, nothing else. The status lives under
+   the board, in a slot with its own reserved height, so the shell's vertical
+   centring cannot turn a changing line into a moving board. */
 .bar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.75rem;
     min-height: 2.5rem;
@@ -157,7 +157,7 @@ a {
     aspect-ratio: 1;
     /* Capped by the viewport height, not the width alone, so a landscape phone
        still holds the whole board without scrolling. */
-    width: min(96vw, 34rem, calc(100vh - 9rem));
+    width: min(96vw, 34rem, calc(100vh - 10.5rem));
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -222,6 +222,7 @@ a {
 
 .status {
     margin: 0;
+    min-height: 1.6rem;
     text-align: center;
     color: var(--muted);
     overflow: hidden;
@@ -283,7 +284,7 @@ a {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     grid-template-rows: repeat(8, minmax(0, 1fr));
     aspect-ratio: 1;
-    width: min(92vw, 34rem, calc(100vh - 9rem));
+    width: min(92vw, 34rem, calc(100vh - 10.5rem));
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -329,7 +330,7 @@ a {
 @supports (height: 100dvh) {
     .board,
     .loading-board {
-        width: min(96vw, 34rem, calc(100dvh - 9rem));
+        width: min(96vw, 34rem, calc(100dvh - 10.5rem));
     }
 }
 
@@ -339,30 +340,6 @@ a {
     }
 
     .shell {
-        width: min(96vw, calc(100dvh - 9rem));
-    }
-
-    /* Two rows on a phone, in every state, so the message gets the full width
-       without the level name and the button fighting it for space. */
-    .bar {
-        grid-template-columns: minmax(0, 1fr) auto;
-        grid-template-areas:
-            "level button"
-            "status status";
-        row-gap: 0.35rem;
-    }
-
-    .opponent,
-    .level-select {
-        grid-area: level;
-    }
-
-    .status {
-        grid-area: status;
-        text-align: left;
-    }
-
-    .actions {
-        grid-area: button;
+        width: min(96vw, calc(100dvh - 10.5rem));
     }
 }

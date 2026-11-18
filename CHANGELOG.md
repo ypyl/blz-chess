@@ -29,6 +29,9 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Fixed
 
+- The status line, "Your move" and the result, moved from the header to under the
+  board, where a player looks while playing. The header keeps the level and the
+  actions.
 - The phone layout was silently broken: a stray brace in the stylesheet stopped
   every rule after it, including the one that gives the status its own row. The board
   is now also capped by the viewport height, so a landscape phone does not scroll.
