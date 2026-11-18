@@ -10,6 +10,20 @@
     --accent-deep: #c39a35;
 }
 
+/* One scale for the whole page. Every size in this stylesheet is in rem, so the root
+   font-size is the size of the app: the board, the header, the buttons, the type, and the
+   shelves grow and shrink together instead of the board shrinking alone inside a fixed
+   chrome. The design size is 1rem; 15.8rem is everything that is not the board, so the
+   fraction is "how much of a full-size app still fits", and the floor keeps the type
+   readable when the window cannot hold one. Below the floor the board takes the rest,
+   which is what its own height cap already does.
+   shortcut: the floor means a very short window scales no further, so the board is then
+   capped by its own height rule and the chrome around it is proportionally larger,
+   revisit if a landscape window shorter than 24rem tall ever needs a bigger board. */
+html {
+    font-size: clamp(0.8rem, calc((100vh - 15.8rem) / 34), 1rem);
+}
+
 html,
 body {
     margin: 0;
@@ -457,6 +471,10 @@ a {
 /* The dynamic viewport follows the mobile browser chrome, which is what a phone
    actually gives the page. The plain vh fallback above keeps older browsers working. */
 @supports (height: 100dvh) {
+    html {
+        font-size: clamp(0.8rem, calc((100dvh - 15.8rem) / 34), 1rem);
+    }
+
     .board,
     .loading-board {
         width: min(96vw, 34rem, calc(100dvh - var(--chrome)));

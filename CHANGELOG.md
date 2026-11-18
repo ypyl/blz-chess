@@ -20,6 +20,9 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Changed
 
+- The whole page scales with the window. In a short window the header, the buttons, the
+  type, and the shelves shrink with the board, instead of the board shrinking alone inside
+  a frame sized for a bigger screen.
 - The levels are called Random, Learner, Beginner, Casual, Club, and Expert. The old
   "No idea how to play" made the dropdown as wide as a sentence and took the room the
   buttons needed. Nothing about how they play changed.

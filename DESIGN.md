@@ -65,6 +65,12 @@ counts files better with clean squares than with labels in the corners).
   it came from stays visible with its piece dimmed. A press that never travels stays a
   tap, so tapping a piece and tapping its destination works exactly as before.
 
+The app has one size. Everything in the stylesheet is in rem, and the root font-size is
+that size: the design size until a shorter window cannot hold it, then a fraction of the
+design, floored at 0.8 where type stops being readable. So the board, the header, the
+buttons, the type, and the shelves scale together rather than the board shrinking inside a
+frame built for a bigger one.
+
 Type is the system sans stack. Headings are letterspaced tight; nothing else is
 bold except the result line and the level name.
 
