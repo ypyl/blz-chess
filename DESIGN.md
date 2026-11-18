@@ -47,6 +47,12 @@ white back rank outward, with the percentage underneath. At the end the board is
 set, which is the position the game starts from, so the loading screen and the game
 share one picture.
 
+The loading view is laid out as the game view: the same shell, a header row with
+invisible placeholders for the level and the action, the same board, and the
+percentage in the status slot where "Your move" will appear. So the board is the
+same size and in the same place before and after the app takes over, and nothing
+jumps or resizes at the moment loading ends.
+
 Blazor publishes its progress as a custom property on the document. A short inline
 loop reads it, places that share of the thirty-two pieces, and stops the moment
 Blazor replaces the loading markup. The pieces are the ones already preloaded for
