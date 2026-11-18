@@ -1,10 +1,10 @@
 name: deploy
 
-# Publishes the site to GitHub Pages on every push to main. The branch is the
+# Publishes the site to GitHub Pages on every push to master. The branch is the
 # gate: a pull request gets no Pages permissions and no OIDC token.
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
