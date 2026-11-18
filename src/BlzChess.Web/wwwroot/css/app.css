@@ -308,13 +308,7 @@ a {
     visibility: hidden;
 }
 
-.loading-text {
-    font-variant-numeric: tabular-nums;
-}
-
-.loading-text::after {
-    content: "Loading " var(--blazor-load-percentage-text, "");
-}}}
+}}
 
 @media (max-width: 30rem) {
     h1 {
