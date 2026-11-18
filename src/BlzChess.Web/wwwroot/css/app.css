@@ -120,8 +120,22 @@ a {
     cursor: pointer;
 }
 
-.bar .ghost {
+.actions {
+    display: flex;
+    gap: 0.4rem;
     justify-self: end;
+}
+
+.ghost:disabled {
+    color: var(--muted);
+    opacity: 0.5;
+    cursor: default;
+}
+
+.ghost:disabled:hover,
+.ghost:disabled:focus-visible {
+    border-color: var(--line);
+    color: var(--muted);
 }
 
 .ghost:hover,
@@ -339,7 +353,7 @@ a {
         text-align: left;
     }
 
-    .bar .ghost {
+    .actions {
         grid-area: button;
     }
 }

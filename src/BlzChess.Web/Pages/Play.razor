@@ -18,7 +18,18 @@
             }
         </select>
         <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
-        <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
+        <div class="actions">
+            @if (_flow.Stage == GameStage.Playing)
+            {
+                <button type="button"
+                        class="ghost"
+                        disabled="@(_flow.Session.Game.Moves.Count == 0)"
+                        @onclick="UndoLastMove">
+                    Undo
+                </button>
+            }
+            <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
+        </div>
     </header>
 
     <div class="board" role="grid" aria-label="Chess board">
@@ -74,6 +85,14 @@
         if (int.TryParse(args.Value?.ToString(), out var index) && _flow.ChangeLevel(Level.ByIndex(index)))
         {
             _error = null;
+        }
+    }
+
+    private void UndoLastMove()
+    {
+        if (_flow.UndoLastMove())
+        {
+            ClearSelection();
         }
     }
 

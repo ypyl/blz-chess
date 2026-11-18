@@ -77,6 +77,15 @@ public sealed class GameFlow
     }
 
     /// <summary>
+    /// Takes back the player's last move and the computer's answer, only while a game
+    /// is running. A finished game stays finished.
+    /// </summary>
+    public bool UndoLastMove()
+    {
+        return Stage == GameStage.Playing && Session.UndoPlayerTurn();
+    }
+
+    /// <summary>
     /// Starts the same level again with a fresh board, and records nothing: the game
     /// that was in progress is gone, with no result and no winner. Refused unless a
     /// game is running, because there is nothing to restart otherwise.

@@ -40,6 +40,7 @@ public sealed class Game
 {
     private readonly List<Move> _moves = [];
     private readonly List<string> _positionKeys = [];
+    private readonly Position _initialPosition;
 
     public Game()
         : this(Position.Initial)
@@ -49,6 +50,7 @@ public sealed class Game
     public Game(Position position)
     {
         ArgumentNullException.ThrowIfNull(position);
+        _initialPosition = position.Clone();
         Position = position;
         _positionKeys.Add(position.PlacementKey());
     }
@@ -90,6 +92,33 @@ public sealed class Game
 
     /// <summary>True when the move is legal in the current position.</summary>
     public bool IsLegal(Move move) => !Result.IsOver && MoveGenerator.LegalMoves(Position).Contains(move);
+
+    /// <summary>
+    /// Drops the last <paramref name="count"/> moves and rebuilds the position by
+    /// replaying what is left, from the position the game started from. There is no
+    /// reverse for <see cref="Position.ApplyUnchecked"/>: castling moves rooks, en
+    /// passant clears squares nobody moved to, and rights and clocks shift. A replay
+    /// of moves that were legal when they were played is the same position, exactly.
+    /// </summary>
+    public bool TrimMoves(int count)
+    {
+        if (count is < 1 || count > _moves.Count)
+        {
+            return false;
+        }
+
+        _moves.RemoveRange(_moves.Count - count, count);
+        Position = _initialPosition.Clone();
+        _positionKeys.Clear();
+        _positionKeys.Add(Position.PlacementKey());
+        foreach (var move in _moves)
+        {
+            Position = Position.ApplyUnchecked(move);
+            _positionKeys.Add(Position.PlacementKey());
+        }
+
+        return true;
+    }
 
     /// <summary>Moves from one square, for the page's highlighting. Empty for an illegal source.</summary>
     public List<Move> LegalMovesFrom(int from) =>
