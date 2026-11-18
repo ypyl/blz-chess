@@ -24,10 +24,11 @@ counts files better with clean squares than with labels in the corners).
   alone once it is over. The pair sits in one slot, so the header has one shape.
 - The level list is always enabled: mid-game it changes the opponent's next move,
   after a result it changes the next game's.
-- The header holds the level, the status, and that action in that order: level name,
-  then the message, then the button. The status slot exists in every state, so "Your
-  move", "Thinking" and the result take the same room and the board never moves. On a
-  phone the message gets its own row, still in every state.
+- The header holds the level and the actions, nothing else. The status lives under
+  the board, centered, in a slot with its own reserved height, so "Your move",
+  "Thinking" and the result take the same room and the board never moves: the shell
+  is centred vertically, and a line below the board that grew would shift the board
+  above it.
 - Selected square: inset accent ring. Legal destination: a small dark dot, or a
   ring when the destination holds a piece.
 
