@@ -127,6 +127,7 @@ jobs:
           curl -fsS -o /dev/null "${url}manifest.webmanifest"
           curl -fsS -o /dev/null "${url}icon.svg"
           curl -fsS -o /dev/null "${url}icon-192.png"
+          curl -fsS -o /dev/null "${url}icon-512.png"
 
           # One byte of the engine proves the asset a game will fetch is served.
           curl -fsS -r 0-0 -o /dev/null "${url}engine/stockfish-19-lite-single.wasm"
