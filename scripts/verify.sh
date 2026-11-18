@@ -41,6 +41,46 @@ fi
 
 # --- project checks --------------------------------------------------------
 
+# Installability, as a browser sees it: a manifest with the fields and icon sizes an
+# install prompt asks for, the icon files really present, and the page linking both
+# the manifest and the touch icon. The app has no install server-side; this is the
+# whole contract.
+if command -v node >/dev/null 2>&1; then
+  installability=$(node -e '
+const fs = require("fs");
+const missing = [];
+const manifest = JSON.parse(fs.readFileSync("src/BlzChess.Web/wwwroot/manifest.webmanifest", "utf8"));
+if (!manifest.name) missing.push("manifest has no name");
+if (!manifest.start_url) missing.push("manifest has no start_url");
+if (manifest.display !== "standalone") missing.push("display is not standalone");
+const sizes = manifest.icons.map((i) => i.sizes).join(" ");
+if (!sizes.includes("192") || !sizes.includes("512")) missing.push("manifest icons lack a 192 and a 512");
+for (const icon of manifest.icons) {
+  if (!fs.existsSync("src/BlzChess.Web/wwwroot/" + icon.src)) missing.push("missing icon " + icon.src);
+}
+const index = fs.readFileSync("src/BlzChess.Web/wwwroot/index.html", "utf8");
+if (!index.includes("manifest.webmanifest")) missing.push("the page does not link the manifest");
+if (!index.includes("apple-touch-icon")) missing.push("the page links no apple-touch-icon");
+if (missing.length > 0) {
+  for (const line of missing) console.log(line);
+  process.exit(1);
+}
+console.log("manifest, icons, and links all present");
+')
+  if [[ $? -ne 0 ]]; then
+    printf '
+==> Installability: the browser would refuse to install
+'
+    printf '%s
+' "$installability" | sed 's/^/  FAIL /'
+    status=1
+  else
+    printf '
+==> Installability: %s
+' "$installability"
+  fi
+fi
+
 # The loading board is static markup, so nothing derives its colours the way the game
 # board does. Assert the real board's parity here: a square is light when its file and
 # rank differ in parity, which makes a8 light and a1 dark. An inverted loading board

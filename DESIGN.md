@@ -37,7 +37,13 @@ bold except the result line and the level name.
 ## Mobile
 
 The same column at 96vw. The board takes the full width, the header wraps the status
-onto its own row, and nothing needs a horizontal scroll at 390px.
+onto its own row, and nothing needs a horizontal scroll at 390px. The board is also
+capped by the viewport height in dynamic units, so a landscape phone holds the whole
+board without scrolling either.
+
+The app installs as a PWA: the manifest carries the name, the standalone display,
+the app's colours, and the three icon sizes an install prompt asks for, and
+`scripts/verify.sh` refuses to let any of that drift.
 
 ## The loading screen
 
