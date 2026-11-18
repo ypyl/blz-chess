@@ -43,13 +43,13 @@ onto its own row, and nothing needs a horizontal scroll at 390px.
 
 Before the app boots, the page shows the board being set up: an empty board of the
 app's cream and green, and the thirty-two pieces arriving one at a time from the
-white back rank outward, with the percentage underneath. At the end the board is
-set, which is the position the game starts from, so the loading screen and the game
-share one picture.
+white back rank outward, like someone placing them. At the end the board is set,
+which is the position the game starts from, so the loading screen and the game share
+one picture. The pieces are the indicator; there is no text, no number, nothing else
+on the page.
 
-The loading view is laid out as the game view: the same shell, a header row with
-invisible placeholders for the level and the action, the same board, and the
-percentage in the status slot where "Your move" will appear. Its squares follow the
+The loading view is laid out as the game view: the same shell, a header row whose
+three slots are invisible placeholders, and the same board. Its squares follow the
 same parity as the game board, a8 light and a1 dark, and `scripts/verify.sh` asserts
 that on the static markup because nothing derives it for them. So the board is the
 same size and in the same place before and after the app takes over, and nothing
