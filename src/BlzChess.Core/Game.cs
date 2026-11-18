@@ -39,6 +39,7 @@ public readonly record struct GameResult(ResultKind Kind, Color? Winner)
 public sealed class Game
 {
     private readonly List<Move> _moves = [];
+    private readonly List<Piece> _captured = [];
     private readonly List<string> _positionKeys = [];
     private readonly Position _initialPosition;
 
@@ -58,6 +59,13 @@ public sealed class Game
     public Position Position { get; private set; }
 
     public IReadOnlyList<Move> Moves => _moves;
+
+    /// <summary>
+    /// The pieces taken off the board, in the order they were taken. Recorded as each move
+    /// is applied, so the replay behind a take-back rebuilds it with the moves instead of
+    /// a second rule that could drift from them.
+    /// </summary>
+    public IReadOnlyList<Piece> Captured => _captured;
 
     public GameResult Result => ComputeResult();
 
@@ -83,11 +91,48 @@ public sealed class Game
             return false;
         }
 
-        Position = Position.ApplyUnchecked(move);
         _moves.Add(move);
-        _positionKeys.Add(Position.PlacementKey());
+        Apply(move);
         applied = move;
         return true;
+    }
+
+    /// <summary>
+    /// Applies a move the caller has already found legal and recorded, noting anything it
+    /// takes. One site, so a move played now and the same move replayed after a take-back
+    /// cannot disagree about what was taken.
+    /// </summary>
+    private void Apply(Move move)
+    {
+        // Read before the move, because the move is what empties the square.
+        if (TakenBy(Position, move) is { } taken)
+        {
+            _captured.Add(taken);
+        }
+
+        Position = Position.ApplyUnchecked(move);
+        _positionKeys.Add(Position.PlacementKey());
+    }
+
+    /// <summary>
+    /// What <paramref name="move"/> takes, or nothing. A pawn landing diagonally on an
+    /// empty square is taking in passing, and the pawn it takes is beside it, not on the
+    /// square it landed on.
+    /// </summary>
+    private static Piece? TakenBy(Position position, Move move)
+    {
+        if (position[move.To] is { } onTarget)
+        {
+            return onTarget;
+        }
+
+        if (position[move.From] is { Type: PieceType.Pawn } pawn
+            && Squares.FileOf(move.From) != Squares.FileOf(move.To))
+        {
+            return new Piece(pawn.Color == Color.White ? Color.Black : Color.White, PieceType.Pawn);
+        }
+
+        return null;
     }
 
     /// <summary>True when the move is legal in the current position.</summary>
@@ -111,10 +156,10 @@ public sealed class Game
         Position = _initialPosition.Clone();
         _positionKeys.Clear();
         _positionKeys.Add(Position.PlacementKey());
+        _captured.Clear();
         foreach (var move in _moves)
         {
-            Position = Position.ApplyUnchecked(move);
-            _positionKeys.Add(Position.PlacementKey());
+            Apply(move);
         }
 
         return true;
