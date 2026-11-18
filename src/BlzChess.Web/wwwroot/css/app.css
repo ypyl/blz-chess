@@ -259,29 +259,25 @@ a {
 /* The loading screen is the board itself, filling one square at a time as the
    runtime arrives. The squares are the board's own two colours and the filled ones
    take the accent, so the wait looks like the product instead of a spinner. */
-.loading {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: 1rem;
-    padding: 1.5rem;
-}
-
+/* The same board the game shows, in the same geometry: the shell's width, square,
+   one radius, one shadow, no gap. The wait must not change the size of the thing it
+   is standing in for. */
 .loading-board {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
-    width: min(76vw, 20rem);
-    border-radius: 0.4rem;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+    aspect-ratio: 1;
+    width: min(92vw, 34rem);
+    border-radius: 0.5rem;
     overflow: hidden;
+    box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
 }
 
 .loading-board span {
     display: grid;
     place-items: center;
-    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
 }
 
 .loading-board span img {
@@ -305,15 +301,19 @@ a {
     background: var(--board-dark);
 }
 
+/* The loading view is the game view with the pieces still arriving: the same shell,
+   the same header row with placeholders, the same board. Nothing moves or resizes
+   when the app takes over, which is the whole point of the screen. */
+.loading-placeholder {
+    visibility: hidden;
+}
+
 .loading-text {
-    margin: 0;
-    color: var(--muted);
-    font-size: 0.9rem;
     font-variant-numeric: tabular-nums;
 }
 
 .loading-text::after {
-    content: var(--blazor-load-percentage-text, "Loading");
+    content: "Loading " var(--blazor-load-percentage-text, "");
 }}}
 
 @media (max-width: 30rem) {
