@@ -28,6 +28,13 @@
                     Undo
                 </button>
             }
+            <button type="button"
+                    class="ghost @(_flow.Hints ? "on" : null)"
+                    aria-pressed="@(_flow.Hints ? "true" : "false")"
+                    title="Show the move the engine likes best"
+                    @onclick="ToggleHintsAsync">
+                Hints
+            </button>
             <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
         </div>
     </header>
@@ -81,6 +88,16 @@
                  draggable="false"
                  style="@GhostStyle" />
         }
+        @* The suggested move. The same overlay as the computer's move, dashed and
+           thinner, because two solid arrows would be a guess about which is which. *@
+        @if (_flow.Suggestion is { } suggestion && _flow.Stage == GameStage.Playing)
+        {
+            var (hintLine, hintHead) = ArrowGeometry(suggestion);
+            <svg class="engine-arrow hint-arrow" viewBox="0 0 800 800" preserveAspectRatio="none" aria-hidden="true">
+                <line x1="@hintLine.X1" y1="@hintLine.Y1" x2="@hintLine.X2" y2="@hintLine.Y2" />
+                <polygon points="@hintHead" />
+            </svg>
+        }
         @* Inside the board, not beside it: `inset: 0` resolves against the nearest
            positioned ancestor, and a sibling would have spanned the window. *@
         @if (_engineMove is { } move)
@@ -100,6 +117,8 @@
             <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
         }
     </div>
+
+    <p class="visually-hidden" aria-live="polite">@SuggestionText</p>
 
     <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
 
@@ -139,6 +158,20 @@
 
     private string HeaderActionLabel => _flow.Stage == GameStage.Finished ? "New game" : "Restart";
 
+    private string SuggestionText => _flow.Suggestion is { } move
+        ? $"Suggested move: {Squares.Name(move.From)} to {Squares.Name(move.To)}."
+        : string.Empty;
+
+    private async Task ToggleHintsAsync()
+    {
+        // Asked on the player's turn only: the engine is the opponent too, and one worker
+        // cannot think about two positions at once.
+        if (!_thinking)
+        {
+            await _flow.ToggleHintsAsync();
+        }
+    }
+
     private string Status => _flow.Result.IsOver
         ? _flow.Result.Describe(Color.White)
         : _thinking ? "Thinking…" : "Your move.";
@@ -155,13 +188,14 @@
         }
     }
 
-    private void UndoLastMove()
+    private async Task UndoLastMove()
     {
         if (_flow.UndoLastMove())
         {
             ClearSelection();
             // The move the arrow described is gone with the take-back.
             _engineMove = null;
+            await _flow.SuggestAsync();
         }
     }
 
@@ -179,6 +213,7 @@
             _engineMove = null;
             _thinking = false;
             _error = null;
+            _ = _flow.SuggestAsync();
         }
     }
 
@@ -189,6 +224,7 @@
         _engineMove = null;
         _thinking = false;
         _error = null;
+        _ = _flow.SuggestAsync();
     }
 
     private void ClearSelection()

@@ -18,6 +18,15 @@ public sealed record Level(int Index, string Name, int SkillLevel, int Depth, in
         new(6, "Expert", SkillLevel: 20, Depth: 16, MoveTimeMs: 1500, RandomChance: 0.0),
     ];
 
+    /// <summary>
+    /// The strength a question is answered at, never a level the page offers. A hint
+    /// asked at the opponent's level would sometimes recommend the blunder that makes
+    /// "No idea how to play" feel like a first game. Depth is modest because the answer
+    /// is drawn while the player waits.
+    /// </summary>
+    public static Level Coach { get; } =
+        new(Index: 0, Name: "Coach", SkillLevel: 20, Depth: 12, MoveTimeMs: 600, RandomChance: 0.0);
+
     public static Level Weakest => All[0];
 
     public static Level Strongest => All[^1];

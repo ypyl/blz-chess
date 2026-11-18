@@ -28,7 +28,18 @@ public sealed class GameFlow
         Start(openingLevel);
     }
 
+    private int _suggestionToken;
+
     public GameStage Stage { get; private set; } = GameStage.Playing;
+
+    /// <summary>Whether the page shows a suggested move. Off until the player asks.</summary>
+    public bool Hints { get; private set; }
+
+    /// <summary>
+    /// The move the engine considers best for the player in the position on the board, or
+    /// nothing while there is none to show. A suggestion is never played.
+    /// </summary>
+    public Move? Suggestion { get; private set; }
 
     public GameSession Session { get; private set; } = default!;
 
@@ -49,6 +60,8 @@ public sealed class GameFlow
             return false;
         }
 
+        // The suggestion was about the position before this move.
+        DropSuggestion();
         UpdateStage();
         return true;
     }
@@ -62,7 +75,64 @@ public sealed class GameFlow
 
         var move = await Session.PlayEngineMoveAsync(cancellationToken).ConfigureAwait(false);
         UpdateStage();
+
+        // The position the suggestion described is gone with the move; ask about the new
+        // one so the arrow the player sees belongs to the board they are looking at.
+        await SuggestAsync(cancellationToken).ConfigureAwait(false);
         return move;
+    }
+
+    /// <summary>
+    /// Turns the suggested move on or off. On asks the engine; off takes the arrow away
+    /// and cancels any answer still on its way.
+    /// </summary>
+    public async Task ToggleHintsAsync(CancellationToken cancellationToken = default)
+    {
+        Hints = !Hints;
+        if (!Hints)
+        {
+            _suggestionToken++;
+            Suggestion = null;
+            return;
+        }
+
+        await SuggestAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Asks the engine for the best move in the position on the board and keeps the
+    /// answer if it is still wanted when it arrives. Never blocks: the caller does not
+    /// wait to let the player move.
+    /// </summary>
+    public async Task SuggestAsync(CancellationToken cancellationToken = default)
+    {
+        if (!Hints || Stage != GameStage.Playing || Session.IsEngineThinking)
+        {
+            Suggestion = null;
+            return;
+        }
+
+        var position = Session.Game.Position;
+        if (position.SideToMove != Session.PlayerColor)
+        {
+            Suggestion = null;
+            return;
+        }
+
+        var token = ++_suggestionToken;
+        var fen = Session.Game.Fen;
+        var legal = Session.Game.LegalMoves().ToHashSet();
+        var answer = await _engine.BestMoveAsync(fen, Level.Coach, cancellationToken).ConfigureAwait(false);
+
+        // A slow answer can arrive after the player moved, took a move back, started a new
+        // game, or switched hints off. An arrow for a position that is no longer on the
+        // board is worse than no arrow, so the token decides.
+        if (token != _suggestionToken || !Hints || Stage != GameStage.Playing)
+        {
+            return;
+        }
+
+        Suggestion = answer is { } move && legal.Contains(move) ? move : null;
     }
 
     /// <summary>
@@ -82,7 +152,13 @@ public sealed class GameFlow
     /// </summary>
     public bool UndoLastMove()
     {
-        return Stage == GameStage.Playing && Session.UndoPlayerTurn();
+        if (Stage != GameStage.Playing || !Session.UndoPlayerTurn())
+        {
+            return false;
+        }
+
+        DropSuggestion();
+        return true;
     }
 
     /// <summary>
@@ -97,6 +173,7 @@ public sealed class GameFlow
             return false;
         }
 
+        DropSuggestion();
         Start(Level);
         return true;
     }
@@ -105,13 +182,28 @@ public sealed class GameFlow
     /// Starts a fresh game at the level shown. This is the way out of a finished game,
     /// because a page that always holds a game has nothing else to go back to.
     /// </summary>
-    public void NewGame() => Start(Level);
+    public void NewGame()
+    {
+        DropSuggestion();
+        Start(Level);
+    }
+
+    /// <summary>
+    /// Forgets the suggestion without asking for a new one. Used where the position moved
+    /// without a move being made: a take-back, a restart, a new game.
+    /// </summary>
+    private void DropSuggestion()
+    {
+        _suggestionToken++;
+        Suggestion = null;
+    }
 
     private void Start(Level level)
     {
         ArgumentNullException.ThrowIfNull(level);
         Session = new GameSession(level, _engine, _seed());
         Stage = GameStage.Playing;
+        DropSuggestion();
     }
 
     private void UpdateStage()

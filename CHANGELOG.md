@@ -7,6 +7,9 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Added
 
+- A "Hints" switch shows the move the engine considers best for your position, as a
+  dashed arrow on the board. It is asked at full strength whatever opponent you play,
+  it never plays the move for you, and it is off unless you turn it on.
 - The pieces each side has taken are shown beside the board, the computer's above it
   and yours below, so the material on the board and off it can be read at a glance.
   They sit on a pale shelf, which makes the black ones visible on a phone.
