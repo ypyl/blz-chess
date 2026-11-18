@@ -54,37 +54,6 @@ a {
     color: var(--accent);
 }
 
-/* Level chooser */
-
-.levels {
-    list-style: none;
-    padding: 0;
-    margin: 0.5rem 0 0;
-    display: grid;
-    gap: 0.5rem;
-}
-
-.level {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    border: 1px solid var(--line);
-    border-radius: 0.6rem;
-    background: var(--panel);
-    color: inherit;
-    font: inherit;
-    font-size: 1rem;
-    text-align: left;
-    cursor: pointer;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-}
-
-.level:hover,
-.level:focus-visible {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-    outline: none;
-}
-
 /* Game bar */
 
 /* The status lives in the header, in a slot that exists in every state, so the
