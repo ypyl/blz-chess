@@ -52,16 +52,17 @@
                 </button>
             }
         }
+        @* Inside the board, not beside it: `inset: 0` resolves against the nearest
+           positioned ancestor, and a sibling would have spanned the window. *@
+        @if (_engineMove is { } move)
+        {
+            var (line, head) = ArrowGeometry(move);
+            <svg class="engine-arrow" viewBox="0 0 800 800" preserveAspectRatio="none" aria-hidden="true">
+                <line x1="@line.X1" y1="@line.Y1" x2="@line.X2" y2="@line.Y2" />
+                <polygon points="@head" />
+            </svg>
+        }
     </div>
-
-    @if (_engineMove is { } move)
-    {
-        var (line, head) = ArrowGeometry(move);
-        <svg class="engine-arrow" viewBox="0 0 800 800" aria-hidden="true">
-            <line x1="@line.X1" y1="@line.Y1" x2="@line.X2" y2="@line.Y2" />
-            <polygon points="@head" />
-        </svg>
-    }
 
     <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
 

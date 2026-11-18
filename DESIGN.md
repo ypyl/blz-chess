@@ -33,7 +33,9 @@ counts files better with clean squares than with labels in the corners).
   ring when the destination holds a piece.
 - The computer's last move is drawn over the board as an arrow in the accent colour,
   from the centre of the square the piece left to the centre it landed on, with a
-  head on the destination. It stays through the player's whole turn and is cleared by
+  head on the destination. The overlay is a child of the board, so its coordinate
+  system is the board's: `inset: 0` against a sibling would have spanned the window
+  and pinned the arrow to the middle of the page instead. It stays through the player's whole turn and is cleared by
   the player's own move, a take-back, a restart, or a new game. It never takes a
   click.
 
