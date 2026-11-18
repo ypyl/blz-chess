@@ -38,6 +38,13 @@ counts files better with clean squares than with labels in the corners).
   and pinned the arrow to the middle of the page instead. It stays through the player's whole turn and is cleared by
   the player's own move, a take-back, a restart, or a new game. It never takes a
   click.
+- A piece can be picked up and dropped on its destination. Pressing one of the
+  player's own pieces takes hold of it once the pointer has travelled 6 CSS pixels,
+  and its legal destinations light up while it travels; letting go on one plays the
+  move, and letting go anywhere else puts the piece back. The piece in the air is
+  drawn under the pointer, centred on it, at the board's own cell size, and the square
+  it came from stays visible with its piece dimmed. A press that never travels stays a
+  tap, so tapping a piece and tapping its destination works exactly as before.
 
 Type is the system sans stack. Headings are letterspaced tight; nothing else is
 bold except the result line and the level name.

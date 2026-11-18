@@ -2,6 +2,7 @@
 @using BlzChess.Core
 @using BlzChess.Web.Engine
 @inject IEngine Engine
+@inject IJSRuntime JS
 
 <PageTitle>BlzChess</PageTitle>
 
@@ -31,7 +32,13 @@
         </div>
     </header>
 
-    <div class="board" role="grid" aria-label="Chess board">
+    <div class="board"
+         role="grid"
+         aria-label="Chess board"
+         @ref="_board"
+         @onpointermove="OnPointerMoveAsync"
+         @onpointerup="OnPointerUpAsync"
+         @onpointercancel="OnPointerCancelAsync">
         @for (var rank = 7; rank >= 0; rank--)
         {
             @for (var file = 0; file < 8; file++)
@@ -41,6 +48,7 @@
                         class="@SquareClass(square)"
                         aria-label="@SquareLabel(square)"
                         aria-pressed="@(_selected == square ? "true" : "false")"
+                        @onpointerdown="args => OnPointerDown(args, square)"
                         @onclick="() => OnSquareAsync(square)">
                     @if (PieceAt(square) is { } piece)
                     {
@@ -51,6 +59,17 @@
                     }
                 </button>
             }
+        }
+        @* The piece in the air. Drawn inside the board for the same reason as the arrow,
+           and invisible to pointers so it never swallows the event tracking it. *@
+        @if (_dragging && _dragFrom != Squares.None && PieceAt(_dragFrom) is { } held)
+        {
+            <img class="drag-piece"
+                 src="@PiecePath(held)"
+                 alt=""
+                 aria-hidden="true"
+                 draggable="false"
+                 style="@GhostStyle" />
         }
         @* Inside the board, not beside it: `inset: 0` resolves against the nearest
            positioned ancestor, and a sibling would have spanned the window. *@
@@ -79,6 +98,24 @@
     private bool _thinking;
     private Move? _engineMove;
     private string? _error;
+
+    private ElementReference _board;
+    private double _boardLeft;
+    private double _boardTop;
+    private double _boardSide;
+
+    // A press is not a drag until the pointer travels this far, so a tap keeps being a
+    // tap and its click still moves a piece the way it always did.
+    private const double DragThreshold = 6;
+
+    private int _dragFrom = Squares.None;
+    private long _dragPointerId;
+    private double _dragOriginX;
+    private double _dragOriginY;
+    private double _dragX;
+    private double _dragY;
+    private bool _dragging;
+    private bool _captured;
 
     protected override void OnInitialized() => _flow = new GameFlow(Engine);
 
@@ -157,6 +194,11 @@
             classes.Add("target");
         }
 
+        if (_dragging && _dragFrom == square)
+        {
+            classes.Add("lifted");
+        }
+
         if (_thinking || _flow.Stage != GameStage.Playing)
         {
             classes.Add("locked");
@@ -180,12 +222,8 @@
 
         if (_selected != Squares.None && _targets.Contains(square))
         {
-            var move = new Move(_selected, square, PromotionIfAny(_selected, square));
-            if (_flow.TryPlayerMove(move, out _))
+            if (await PlayAsync(_selected, square))
             {
-                ClearSelection();
-                _engineMove = null;
-                await EngineReplyAsync();
                 return;
             }
         }
@@ -203,6 +241,170 @@
 
         _selected = square;
         _targets = [.. legalFromSquare.Select(move => move.To)];
+    }
+
+    /// <summary>
+    /// Plays a move the player has chosen, by click or by drop, and lets the computer
+    /// answer. False when the rules refuse it, in which case nothing moved.
+    /// </summary>
+    private async Task<bool> PlayAsync(int from, int to)
+    {
+        var move = new Move(from, to, PromotionIfAny(from, to));
+        if (!_flow.TryPlayerMove(move, out _))
+        {
+            return false;
+        }
+
+        ClearSelection();
+        _engineMove = null;
+        await EngineReplyAsync();
+        return true;
+    }
+
+    private string GhostStyle =>
+        FormattableString.Invariant(
+            $"left:{_dragX - (_boardSide / 16):0.##}px;top:{_dragY - (_boardSide / 16):0.##}px;width:{_boardSide / 8:0.##}px;height:{_boardSide / 8:0.##}px");
+
+    /// <summary>
+    /// A press on one of the player's pieces takes hold of it. Nothing is awaited here: a
+    /// round trip to the browser before the drag is armed loses a fast flick, and the
+    /// square is already known because the press happened on that square's own button.
+    /// The selection is left to the click, so a press that never travels stays a tap.
+    /// </summary>
+    private void OnPointerDown(PointerEventArgs args, int square)
+    {
+        if (_flow.Session is not { } session || _flow.Stage != GameStage.Playing || _thinking)
+        {
+            return;
+        }
+
+        if (Drag.Lift(session, square) == Squares.None)
+        {
+            return;
+        }
+
+        _dragFrom = square;
+        _dragPointerId = args.PointerId;
+        _dragOriginX = args.ClientX;
+        _dragOriginY = args.ClientY;
+        _dragging = false;
+    }
+
+    /// <summary>
+    /// The piece is in the air once the pointer has gone far enough to mean it. Its legal
+    /// destinations appear the way a click shows them.
+    /// </summary>
+    private async Task OnPointerMoveAsync(PointerEventArgs args)
+    {
+        if (_dragFrom == Squares.None || args.PointerId != _dragPointerId)
+        {
+            return;
+        }
+
+        if (!_dragging)
+        {
+            var dx = args.ClientX - _dragOriginX;
+            var dy = args.ClientY - _dragOriginY;
+            if (Math.Sqrt((dx * dx) + (dy * dy)) < DragThreshold)
+            {
+                return;
+            }
+
+            // Measured before the piece is lifted, so the piece is drawn at the board's
+            // size on its first frame instead of at a stale one.
+            await MeasureBoardAsync();
+
+            // Capture now, not on the press: a captured pointer sends the click that
+            // follows a tap to the board instead of the square, which would take
+            // tap-to-move away. By here the press is a drag and there is no click to lose.
+            await JS.InvokeVoidAsync("blzPointer.capture", _board, _dragPointerId);
+            _captured = true;
+
+            _dragging = true;
+            Select(_dragFrom);
+        }
+
+        FollowPointer(args);
+        StateHasChanged();
+    }
+
+    private async Task OnPointerUpAsync(PointerEventArgs args)
+    {
+        if (_dragFrom == Squares.None || args.PointerId != _dragPointerId)
+        {
+            return;
+        }
+
+        var from = _dragFrom;
+        var wasDragging = _dragging;
+        await EndDragAsync();
+
+        if (!wasDragging)
+        {
+            // A press that did not travel. The click that follows still moves the piece.
+            return;
+        }
+
+        // Measured again rather than trusted from the press: the window can be resized
+        // between the two, and the drop is the one reading that has to be right.
+        await MeasureBoardAsync();
+        var landing = BoardGeometry.SquareAt(args.ClientX - _boardLeft, args.ClientY - _boardTop, _boardSide);
+        var to = Drag.Land(_targets, landing);
+        if (to == Squares.None)
+        {
+            // Let go where the piece may not go: it stays put, still selected, so the
+            // player can tap a destination instead.
+            return;
+        }
+
+        await PlayAsync(from, to);
+    }
+
+    private async Task OnPointerCancelAsync(PointerEventArgs args)
+    {
+        if (_dragFrom != Squares.None && args.PointerId == _dragPointerId)
+        {
+            await EndDragAsync();
+        }
+    }
+
+    private async Task MeasureBoardAsync()
+    {
+        var box = await JS.InvokeAsync<BoardBox>("blzPointer.rect", _board);
+        _boardLeft = box.Left;
+        _boardTop = box.Top;
+        _boardSide = box.Width;
+    }
+
+    private void FollowPointer(PointerEventArgs args)
+    {
+        _dragX = args.ClientX - _boardLeft;
+        _dragY = args.ClientY - _boardTop;
+    }
+
+    private async Task EndDragAsync()
+    {
+        if (_captured)
+        {
+            await JS.InvokeVoidAsync("blzPointer.release", _board, _dragPointerId);
+            _captured = false;
+        }
+
+        _dragFrom = Squares.None;
+        _dragging = false;
+        StateHasChanged();
+    }
+
+    /// <summary>Selects a piece and its destinations, the way a click does.</summary>
+    private void Select(int square)
+    {
+        if (_flow.Session is not { } session)
+        {
+            return;
+        }
+
+        _selected = square;
+        _targets = [.. session.LegalMovesFrom(square).Select(move => move.To)];
     }
 
     private PieceType? PromotionIfAny(int from, int to)
@@ -271,6 +473,9 @@
 
     private static (double X, double Y) SquareCentre(int square) =>
         ((Squares.FileOf(square) * 100.0) + 50, ((7 - Squares.RankOf(square)) * 100.0) + 50);
+
+    /// <summary>The board's box, as the browser reports it.</summary>
+    private sealed record BoardBox(double Left, double Top, double Width, double Height);
 
     private static string PiecePath(Piece piece) => $"pieces/{PieceFiles.FileName(piece)}";
 

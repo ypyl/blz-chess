@@ -5,6 +5,12 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
+### Added
+
+- Pieces can be dragged to their square with a mouse or a finger, as well as tapped.
+  A piece's legal destinations appear while it is in the air, and letting go anywhere
+  else puts the piece back.
+
 ### Changed
 
 - The app starts a game as soon as it opens, at the weakest level, instead of asking

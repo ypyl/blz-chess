@@ -162,6 +162,16 @@ a {
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
+    /* A finger on the board is a piece being dragged, never a page being panned.
+       Without this the browser claims the gesture and cancels the drag with
+       pointercancel on the one device where dragging matters most.
+       shortcut: the board refuses touch-action so a drag can own a finger, revisit if
+       pinch-zoom over the board is ever wanted, which needs per-gesture touch-action
+       support the browsers do not have. */
+    touch-action: none;
+    /* A drag must not paint a text selection across the squares. */
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .square {
@@ -242,6 +252,21 @@ a {
 .engine-arrow polygon {
     fill: var(--accent);
     fill-opacity: 0.85;
+}
+
+/* The piece in the air, under the pointer and out of the way of the events that
+   track it. Sized and placed from the board's own measurement, so it is the same
+   piece at any board size. */
+.drag-piece {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    will-change: left, top;
+}
+
+/* The square the piece was taken from: still there, visibly emptied. */
+.square.lifted img {
+    opacity: 0.25;
 }
 
 .status {
