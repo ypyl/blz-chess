@@ -10,7 +10,7 @@ public class GameFlowTests
         var flow = new GameFlow(new FakeEngine("e7e5"));
 
         Assert.Equal(GameStage.Playing, flow.Stage);
-        Assert.Equal("No idea how to play", flow.Level.Name);
+        Assert.Equal("Random", flow.Level.Name);
         Assert.Equal(Fen.StartingPosition, flow.Session.Game.Fen);
         Assert.Equal(Color.White, flow.Session.Game.Position.SideToMove);
         Assert.Empty(flow.Session.Game.Moves);
@@ -46,7 +46,7 @@ public class GameFlowTests
         var afterRefresh = new GameFlow(new FakeEngine("e7e5"));
 
         Assert.Equal(GameStage.Playing, afterRefresh.Stage);
-        Assert.Equal("No idea how to play", afterRefresh.Level.Name);
+        Assert.Equal("Random", afterRefresh.Level.Name);
         Assert.Empty(afterRefresh.Session.Game.Moves);
         Assert.Equal(Fen.StartingPosition, afterRefresh.Session.Game.Fen);
     }
@@ -132,7 +132,7 @@ public class GameFlowTests
         var flow = new GameFlow(engine, Level.All[4]);
         Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
         await flow.PlayEngineMoveAsync();
-        Assert.Equal("Club player", engine.LastLevel?.Name);
+        Assert.Equal("Club", engine.LastLevel?.Name);
 
         flow.ChangeLevel(Level.Strongest);
         Assert.True(flow.TryPlayerMove(new Move(Squares.Index(3, 1), Squares.Index(3, 3)), out _));
@@ -155,7 +155,7 @@ public class GameFlowTests
         flow.NewGame();
 
         Assert.Equal(GameStage.Playing, flow.Stage);
-        Assert.Equal("No idea how to play", flow.Level.Name);
+        Assert.Equal("Random", flow.Level.Name);
         Assert.False(flow.Result.IsOver);
     }
 

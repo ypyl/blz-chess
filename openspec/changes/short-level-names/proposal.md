@@ -52,3 +52,12 @@ as it is, and every scenario keeps its test.
 `Level.All` holds the names. The loading screen's placeholder carries the weakest name, so
 it changes too, or the header would shift when the app takes over. `README.md` names the
 range. No strength, depth, or timing changes: this is the words on the buttons.
+
+## Approval
+
+- Gate: L1 delta spec
+- Approved by: Yauhen Pyl
+- Approved at: 2026-11-18
+- Artifact: openspec/changes/short-level-names/specs/game/spec.md sha256:39167fab1aa06cd213337f4fb382594b8ec9d24817ce8f22a3fc69c8070ec499
+- Artifact: openspec/changes/short-level-names/proposal.md sha256:a7232d13d3b40d1f5dae0829ba740616079c0190148e733cf2097103c3d25949
+- Words: "(none)"
