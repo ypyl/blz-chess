@@ -49,7 +49,9 @@ share one picture.
 
 The loading view is laid out as the game view: the same shell, a header row with
 invisible placeholders for the level and the action, the same board, and the
-percentage in the status slot where "Your move" will appear. So the board is the
+percentage in the status slot where "Your move" will appear. Its squares follow the
+same parity as the game board, a8 light and a1 dark, and `scripts/verify.sh` asserts
+that on the static markup because nothing derives it for them. So the board is the
 same size and in the same place before and after the app takes over, and nothing
 jumps or resizes at the moment loading ends.
 
