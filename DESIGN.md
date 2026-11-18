@@ -42,8 +42,11 @@ counts files better with clean squares than with labels in the corners).
   the pieces it still has, and the player's below. Each is one reserved line tall
   whether or not it holds anything, so a capture cannot change the shell's height and
   push the board: the shell is centred, and a row that appeared would move the board
-  up. Pieces are listed smallest first, drawn dimmer and smaller than a piece on the
-  board, so the board stays the thing you look at.
+  up. Pieces are listed smallest first and drawn smaller than a piece on the board, so
+  the board stays the thing you look at. The shelf is the light square colour, not the
+  page: a taken black piece on a near-black page is a black shape on black, which is
+  how it shipped once. A black piece reads at 17.9:1 on the shelf, and a white piece
+  keeps the dark outline its artwork carries. `verify.sh` holds that ratio.
 - A piece can be picked up and dropped on its destination. Pressing one of the
   player's own pieces takes hold of it once the pointer has travelled 6 CSS pixels,
   and its legal destinations light up while it travels; letting go on one plays the

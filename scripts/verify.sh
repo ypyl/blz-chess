@@ -152,6 +152,53 @@ else
 '
 fi
 
+# A taken piece has to be visible where it is put. The tray sits on the light square
+# colour because a black piece on the page's near-black was a smudge; that is a ratio,
+# so a machine can hold it. 4.5:1 is the floor for something you have to recognise at a
+# glance, and 4.5:1 is exactly what the old background failed.
+if command -v node >/dev/null 2>&1; then
+  contrast=$(node -e '
+const fs = require("fs");
+const css = fs.readFileSync("src/BlzChess.Web/wwwroot/css/app.css", "utf8");
+const value = (name) => {
+  const match = css.match(new RegExp("--" + name + ":[ 	]*(#[0-9a-fA-F]{6})"));
+  return match ? match[1] : null;
+};
+const channel = (c) => {
+  const v = parseInt(c, 16) / 255;
+  return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+};
+const luminance = (hex) => 0.2126 * channel(hex.slice(1, 3)) + 0.7152 * channel(hex.slice(3, 5)) + 0.0722 * channel(hex.slice(5, 7));
+const trayBlock = css.match(/\.tray\s*\{[^}]*\}/);
+const background = trayBlock ? (trayBlock[0].match(/background:\s*var\(--([a-z-]+)\)/) || [])[1] : null;
+const tray = background ? value(background) : null;
+if (!tray) {
+  console.log("the tray has no background of its own, so a black piece sits on the page colour");
+  process.exit(1);
+}
+const black = 0;
+const light = luminance(tray);
+const ratio = (Math.max(light, black) + 0.05) / (Math.min(light, black) + 0.05);
+if (ratio < 4.5) {
+  console.log("a black taken piece on " + tray + " reaches " + ratio.toFixed(1) + ":1, under the 4.5:1 floor");
+  process.exit(1);
+}
+console.log("a black taken piece reaches " + ratio.toFixed(1) + ":1 on " + tray);
+')
+  if [[ $? -ne 0 ]]; then
+    printf '
+==> Taken pieces: not readable on their shelf
+'
+    printf '%s
+' "$contrast" | sed 's/^/  FAIL /'
+    status=1
+  else
+    printf '
+==> Taken pieces: %s
+' "$contrast"
+  fi
+fi
+
 for step in Lint Build Test; do
   cmd=$(fact "$step")
   if [[ -z "$cmd" ]]; then
