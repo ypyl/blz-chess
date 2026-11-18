@@ -26,13 +26,39 @@ body {
     justify-content: center;
 }
 
+:root {
+    /* One line for a tray of taken pieces. Reserved on every screen and in the loading
+       view, so a capture cannot change the shell's height and push the board. */
+    --tray: 1.75rem;
+    --shell-gap: 0.9rem;
+    /* What the board must leave for everything that is not the board: the header, the
+       status line, two trays, and the gaps between them. */
+    --chrome: calc(10.5rem + var(--tray) + var(--tray) + var(--shell-gap) + var(--shell-gap));
+}
+
 .shell {
     width: min(92vw, 34rem);
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
+    gap: var(--shell-gap);
     padding: 1.5rem 0 2.5rem;
     margin: auto;
+}
+
+/* A row of pieces that are out of the game: on the line it never leaves, in value
+   order, drawn smaller than a square's piece so the board stays the thing you see. */
+.tray {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    height: var(--tray);
+    overflow: hidden;
+}
+
+.tray img {
+    width: calc(var(--tray) - 0.25rem);
+    height: calc(var(--tray) - 0.25rem);
+    opacity: 0.7;
 }
 
 h1 {
@@ -158,7 +184,7 @@ a {
     aspect-ratio: 1;
     /* Capped by the viewport height, not the width alone, so a landscape phone
        still holds the whole board without scrolling. */
-    width: min(96vw, 34rem, calc(100vh - 10.5rem));
+    width: min(96vw, 34rem, calc(100vh - var(--chrome)));
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -333,7 +359,7 @@ a {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     grid-template-rows: repeat(8, minmax(0, 1fr));
     aspect-ratio: 1;
-    width: min(92vw, 34rem, calc(100vh - 10.5rem));
+    width: min(92vw, 34rem, calc(100vh - var(--chrome)));
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -379,7 +405,7 @@ a {
 @supports (height: 100dvh) {
     .board,
     .loading-board {
-        width: min(96vw, 34rem, calc(100dvh - 10.5rem));
+        width: min(96vw, 34rem, calc(100dvh - var(--chrome)));
     }
 }
 
@@ -389,6 +415,6 @@ a {
     }
 
     .shell {
-        width: min(96vw, calc(100dvh - 10.5rem));
+        width: min(96vw, calc(100dvh - var(--chrome)));
     }
 }

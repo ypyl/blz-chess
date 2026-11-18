@@ -32,6 +32,16 @@
         </div>
     </header>
 
+    @* The computer's tray sits above the board, nearest the pieces it still has. Its
+       line is reserved whether or not it holds a piece: the shell is centred
+       vertically, so a row that appeared would push the board up. *@
+    <div class="tray" aria-label="@TakenByComputer">
+        @foreach (var piece in Taken(Color.White))
+        {
+            <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
+        }
+    </div>
+
     <div class="board"
          role="grid"
          aria-label="Chess board"
@@ -80,6 +90,14 @@
                 <line x1="@line.X1" y1="@line.Y1" x2="@line.X2" y2="@line.Y2" />
                 <polygon points="@head" />
             </svg>
+        }
+    </div>
+
+    @* The player's tray, below the board and nearest the player's own pieces. *@
+    <div class="tray" aria-label="@TakenByPlayer">
+        @foreach (var piece in Taken(Color.Black))
+        {
+            <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
         }
     </div>
 
@@ -180,6 +198,24 @@
     }
 
     private Piece? PieceAt(int square) => _flow.Session?.Game.Position[square];
+
+    /// <summary>
+    /// The pieces of <paramref name="color"/> that are off the board, in the order of
+    /// value, so the same row means the same thing game after game.
+    /// </summary>
+    private IEnumerable<Piece> Taken(Color color) =>
+        _flow.Session is { } session
+            ? session.Game.Captured.Where(piece => piece.Color == color).OrderBy(piece => (int)piece.Type)
+            : [];
+
+    private string TakenByComputer => DescribeTray(Color.White, "The computer has taken");
+
+    private string TakenByPlayer => DescribeTray(Color.Black, "You have taken");
+
+    private string DescribeTray(Color color, string lead) =>
+        Taken(color) is { } pieces && pieces.Any()
+            ? lead + ": " + string.Join(", ", pieces.Select(piece => PieceAlt(piece)))
+            : lead + ": nothing yet";
 
     private string SquareClass(int square)
     {

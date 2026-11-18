@@ -38,6 +38,12 @@ counts files better with clean squares than with labels in the corners).
   and pinned the arrow to the middle of the page instead. It stays through the player's whole turn and is cleared by
   the player's own move, a take-back, a restart, or a new game. It never takes a
   click.
+- Two trays of taken pieces flank the board: the computer's above it, on the side of
+  the pieces it still has, and the player's below. Each is one reserved line tall
+  whether or not it holds anything, so a capture cannot change the shell's height and
+  push the board: the shell is centred, and a row that appeared would move the board
+  up. Pieces are listed smallest first, drawn dimmer and smaller than a piece on the
+  board, so the board stays the thing you look at.
 - A piece can be picked up and dropped on its destination. Pressing one of the
   player's own pieces takes hold of it once the pointer has travelled 6 CSS pixels,
   and its legal destinations light up while it travels; letting go on one plays the
