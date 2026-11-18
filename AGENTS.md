@@ -162,7 +162,7 @@ repository is a project and this section never applies again.
 
 The agent does the setup a human would otherwise do by hand and reports each
 step: check Node 22.12 and the OpenSpec version, ask before a global install,
-`git init -b main` when there is no repository, and set
+`git init -b master` when there is no repository, and set
 `git config core.hooksPath .githooks`. Those are reported, not silent. A remote,
 a CI account, and deploy credentials stay the human's job.
 
@@ -611,7 +611,7 @@ human, not a guess.
   between operating systems);
   the `wasm-tools` workload for publish-time trimming; Node 22 or newer for
   `scripts/gate.mjs`
-- Trunk branch: main
+- Trunk branch: master
 - Lint: dotnet format --verify-no-changes --no-restore
 - Build: dotnet build --no-restore -warnaserror
 - Test: dotnet test --no-build
