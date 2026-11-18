@@ -31,6 +31,11 @@ counts files better with clean squares than with labels in the corners).
   above it.
 - Selected square: inset accent ring. Legal destination: a small dark dot, or a
   ring when the destination holds a piece.
+- The computer's last move is drawn over the board as an arrow in the accent colour,
+  from the centre of the square the piece left to the centre it landed on, with a
+  head on the destination. It stays through the player's whole turn and is cleared by
+  the player's own move, a take-back, a restart, or a new game. It never takes a
+  click.
 
 Type is the system sans stack. Headings are letterspaced tight; nothing else is
 bold except the result line and the level name.

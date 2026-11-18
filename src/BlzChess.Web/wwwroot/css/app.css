@@ -148,6 +148,7 @@ a {
 /* Board */
 
 .board {
+    position: relative;
     display: grid;
     /* Both axes are explicit and free of content influence: with rows left auto,
        a row of pieces grew taller than an empty row and the cells stopped being
@@ -218,6 +219,29 @@ a {
 
 .square.locked {
     cursor: not-allowed;
+}
+
+/* The computer's last move, drawn over the board: a shaft between the square
+   centres with a head on the destination. Accent colour, mostly opaque, so it reads
+   on both square colours, and it never takes a click. */
+.engine-arrow {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.engine-arrow line {
+    stroke: var(--accent);
+    stroke-width: 14;
+    stroke-opacity: 0.85;
+    stroke-linecap: round;
+}
+
+.engine-arrow polygon {
+    fill: var(--accent);
+    fill-opacity: 0.85;
 }
 
 .status {
