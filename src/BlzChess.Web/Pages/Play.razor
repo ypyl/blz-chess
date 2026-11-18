@@ -47,6 +47,10 @@
         {
             <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
         }
+        @if (Material.Taken(Game, Color.White) is > 0 and var whiteTaken)
+        {
+            <span class="tray-score" aria-hidden="true">@whiteTaken</span>
+        }
     </div>
 
     <div class="board"
@@ -115,6 +119,10 @@
         @foreach (var piece in Taken(Color.Black))
         {
             <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
+        }
+        @if (Material.Taken(Game, Color.Black) is > 0 and var blackTaken)
+        {
+            <span class="tray-score" aria-hidden="true">@blackTaken</span>
         }
     </div>
 
@@ -248,10 +256,19 @@
 
     private string TakenByPlayer => DescribeTray(Color.Black, "You have taken");
 
-    private string DescribeTray(Color color, string lead) =>
-        Taken(color) is { } pieces && pieces.Any()
-            ? lead + ": " + string.Join(", ", pieces.Select(piece => PieceAlt(piece)))
-            : lead + ": nothing yet";
+    private Game Game => _flow.Session.Game;
+
+    private string DescribeTray(Color color, string lead)
+    {
+        var pieces = Taken(color).ToList();
+        if (pieces.Count == 0)
+        {
+            return lead + ": nothing yet";
+        }
+
+        var names = string.Join(", ", pieces.Select(piece => PieceAlt(piece)));
+        return $"{lead}: {names}, worth {Material.Taken(Game, color)}.";
+    }
 
     private string SquareClass(int square)
     {

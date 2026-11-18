@@ -46,7 +46,11 @@ counts files better with clean squares than with labels in the corners).
   the board stays the thing you look at. The shelf is the light square colour, not the
   page: a taken black piece on a near-black page is a black shape on black, which is
   how it shipped once. A black piece reads at 17.9:1 on the shelf, and a white piece
-  keeps the dark outline its artwork carries. `verify.sh` holds that ratio.
+  keeps the dark outline its artwork carries. `verify.sh` holds that ratio. Each shelf
+  carries the total value of the pieces on it, at its right end, pushed by the row rather
+  than positioned: the number a player wants is "who is ahead", and the pieces to work it
+  out are already on the shelf. A pawn counts 1, knight and bishop 3, rook 5, queen 9.
+  An empty shelf shows no number, so an opening board stays quiet.
 - A "Hints" switch in the header turns on a suggested move: the engine's best move for
   the player, drawn as a dashed, thinner, dimmer version of the same arrow, so "it
   played there" and "you could play there" cannot be confused, including for a reader
