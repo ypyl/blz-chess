@@ -3,7 +3,6 @@ namespace BlzChess.Core;
 /// <summary>What the page is showing.</summary>
 public enum GameStage
 {
-    Choosing,
     Playing,
     Finished,
 }
@@ -18,30 +17,29 @@ public sealed class GameFlow
     private readonly Func<int> _seed;
 
     public GameFlow(IEngine engine, Func<int>? seedFactory = null)
+        : this(engine, Level.Weakest, seedFactory)
+    {
+    }
+
+    public GameFlow(IEngine engine, Level openingLevel, Func<int>? seedFactory = null)
     {
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
         _seed = seedFactory ?? (() => Environment.TickCount);
+        Start(openingLevel);
     }
 
-    public GameStage Stage { get; private set; } = GameStage.Choosing;
+    public GameStage Stage { get; private set; } = GameStage.Playing;
 
-    public GameSession? Session { get; private set; }
+    public GameSession Session { get; private set; } = default!;
 
-    public Level? Level => Session?.Level;
+    public Level Level => Session.Level;
 
-    public GameResult Result => Session?.Result ?? GameResult.InProgress;
-
-    public void ChooseLevel(Level level)
-    {
-        ArgumentNullException.ThrowIfNull(level);
-        Session = new GameSession(level, _engine, _seed());
-        Stage = GameStage.Playing;
-    }
+    public GameResult Result => Session.Result;
 
     public bool TryPlayerMove(Move move, out Move applied)
     {
         applied = default;
-        if (Stage != GameStage.Playing || Session is null)
+        if (Stage != GameStage.Playing)
         {
             return false;
         }
@@ -57,7 +55,7 @@ public sealed class GameFlow
 
     public async Task<Move?> PlayEngineMoveAsync(CancellationToken cancellationToken = default)
     {
-        if (Stage != GameStage.Playing || Session is null)
+        if (Stage != GameStage.Playing)
         {
             return null;
         }
@@ -74,11 +72,6 @@ public sealed class GameFlow
     public bool ChangeLevel(Level level)
     {
         ArgumentNullException.ThrowIfNull(level);
-        if (Stage != GameStage.Playing || Session is null)
-        {
-            return false;
-        }
-
         Session.ChangeLevel(level);
         return true;
     }
@@ -90,25 +83,31 @@ public sealed class GameFlow
     /// </summary>
     public bool Restart()
     {
-        if (Stage != GameStage.Playing || Session is null)
+        if (Stage != GameStage.Playing)
         {
             return false;
         }
 
-        ChooseLevel(Session.Level);
+        Start(Level);
         return true;
     }
 
-    /// <summary>Back to the level list, with no game in progress.</summary>
-    public void NewGame()
+    /// <summary>
+    /// Starts a fresh game at the level shown. This is the way out of a finished game,
+    /// because a page that always holds a game has nothing else to go back to.
+    /// </summary>
+    public void NewGame() => Start(Level);
+
+    private void Start(Level level)
     {
-        Session = null;
-        Stage = GameStage.Choosing;
+        ArgumentNullException.ThrowIfNull(level);
+        Session = new GameSession(level, _engine, _seed());
+        Stage = GameStage.Playing;
     }
 
     private void UpdateStage()
     {
-        if (Session is not null && Session.Result.IsOver)
+        if (Session.Result.IsOver)
         {
             Stage = GameStage.Finished;
         }

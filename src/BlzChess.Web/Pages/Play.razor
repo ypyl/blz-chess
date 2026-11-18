@@ -6,68 +6,47 @@
 <PageTitle>BlzChess</PageTitle>
 
 <main class="shell">
-    @if (_flow.Stage == GameStage.Choosing)
-    {
-        <section class="chooser">
-            <h1>BlzChess</h1>
-            <p class="lede">Pick an opponent. You play White.</p>
-            <ul class="levels">
-                @foreach (var level in Level.All)
-                {
-                    <li>
-                        <button type="button" class="level" @onclick="() => ChooseLevel(level)">
-                            @level.Name
-                        </button>
-                    </li>
-                }
-            </ul>
-        </section>
-    }
-    else
-    {
-        <header class="bar">
-            <select @key="_flow.Level?.Index"
-                    class="level-select"
-                    aria-label="Opponent level"
-                    value="@_flow.Level?.Index"
-                    disabled="@(_flow.Stage != GameStage.Playing)"
-                    @onchange="OnLevelChanged">
-                @foreach (var level in Level.All)
-                {
-                    <option value="@level.Index">@level.Name</option>
-                }
-            </select>
-            <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
-            <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
-        </header>
-
-        <div class="board" role="grid" aria-label="Chess board">
-            @for (var rank = 7; rank >= 0; rank--)
+    <header class="bar">
+        <select @key="_flow.Level?.Index"
+                class="level-select"
+                aria-label="Opponent level"
+                value="@_flow.Level.Index"
+                @onchange="OnLevelChanged">
+            @foreach (var level in Level.All)
             {
-                @for (var file = 0; file < 8; file++)
-                {
-                    var square = Squares.Index(file, rank);
-                    <button type="button"
-                            class="@SquareClass(square)"
-                            aria-label="@SquareLabel(square)"
-                            aria-pressed="@(_selected == square ? "true" : "false")"
-                            @onclick="() => OnSquareAsync(square)">
-                        @if (PieceAt(square) is { } piece)
-                        {
-                            @* Decorative: the button's label already names the square and
-                               its piece, and a non-empty alt paints as text while the
-                               SVG loads, which is the flash this change removes. *@
-                            <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
-                        }
-                    </button>
-                }
+                <option value="@level.Index">@level.Name</option>
             }
-        </div>
+        </select>
+        <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
+        <button type="button" class="ghost" @onclick="HeaderAction">@HeaderActionLabel</button>
+    </header>
 
-        @if (_error is not null)
+    <div class="board" role="grid" aria-label="Chess board">
+        @for (var rank = 7; rank >= 0; rank--)
         {
-            <p class="error">@_error</p>
+            @for (var file = 0; file < 8; file++)
+            {
+                var square = Squares.Index(file, rank);
+                <button type="button"
+                        class="@SquareClass(square)"
+                        aria-label="@SquareLabel(square)"
+                        aria-pressed="@(_selected == square ? "true" : "false")"
+                        @onclick="() => OnSquareAsync(square)">
+                    @if (PieceAt(square) is { } piece)
+                    {
+                        @* Decorative: the button's label already names the square and
+                           its piece, and a non-empty alt paints as text while the
+                           SVG loads, which is the flash this change removes. *@
+                        <img src="@PiecePath(piece)" alt="" aria-hidden="true" draggable="false" />
+                    }
+                </button>
+            }
         }
+    </div>
+
+    @if (_error is not null)
+    {
+        <p class="error">@_error</p>
     }
 </main>
 
@@ -87,8 +66,8 @@
         : _thinking ? "Thinking…" : "Your move.";
 
     /// <summary>
-    /// Changes the opponent without touching the game. Refused by the flow unless a
-    /// game is in progress, which is when the list is enabled.
+    /// Changes the opponent without touching the game. Mid-game it applies to the next
+    /// move; after a result it applies to the next game.
     /// </summary>
     private void OnLevelChanged(ChangeEventArgs args)
     {
@@ -98,17 +77,6 @@
         }
     }
 
-    private void ChooseLevel(Level level)
-    {
-        _flow.ChooseLevel(level);
-        ClearSelection();
-        _error = null;
-    }
-
-    /// <summary>
-    /// The header has one action: restart while playing, start over from the level
-    /// list once the game is done. Two buttons would come and go and move the board.
-    /// </summary>
     private void HeaderAction()
     {
         if (_flow.Stage == GameStage.Finished)

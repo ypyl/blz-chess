@@ -5,6 +5,12 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ## Unreleased
 
+### Changed
+
+- The app starts a game as soon as it opens, at the weakest level, instead of asking
+  for a level first. "New game" after a result starts a fresh game at the level shown,
+  and the level list in the header can change the opponent at any time.
+
 ### Added
 
 - Change the opponent level in the middle of a game. The position, the moves played,

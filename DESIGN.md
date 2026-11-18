@@ -17,18 +17,17 @@ counts files better with clean squares than with labels in the corners).
 - Squares meet with no separator: the two colours are the only division, as on a
   real board. Every cell is the same square whatever stands in it, which is a
   property of the grid, not of the pieces.
-- Level list: one full-width button per level, weakest first, panel background,
-  accent border on hover and focus.
+- There is no screen between loading and playing: the page opens on a board at the
+  weakest level, and the level is a list in the header from the first move.
 - The header's action follows the state: "Restart" while a game runs (same level,
-  fresh board, no result) and "New game" once it is over (back to the level list).
-  One slot, so the header has one shape.
-- The level is a list while a game runs, so the opponent can be changed without
-  losing the position. Once the game is over it is a plain label: the choice no
-  longer does anything, and pretending otherwise would be a trap.
-- In a game the header holds the level, the status, and that action in that order:
-  level name, then the message, then the button. The status slot exists in every
-  state, so "Your move", "Thinking" and the result take the same room and the board
-  never moves. On a phone the message gets its own row, still in every state.
+  fresh board, no result) and "New game" once it is over (fresh board at the level
+  shown). One slot, so the header has one shape.
+- The level list is always enabled: mid-game it changes the opponent's next move,
+  after a result it changes the next game's.
+- The header holds the level, the status, and that action in that order: level name,
+  then the message, then the button. The status slot exists in every state, so "Your
+  move", "Thinking" and the result take the same room and the board never moves. On a
+  phone the message gets its own row, still in every state.
 - Selected square: inset accent ring. Legal destination: a small dark dot, or a
   ring when the destination holds a piece.
 
@@ -37,8 +36,8 @@ bold except the result line and the level name.
 
 ## Mobile
 
-The same column at 96vw. The board takes the full width, the level list keeps its
-full-width rows, and nothing needs a horizontal scroll at 390px.
+The same column at 96vw. The board takes the full width, the header wraps the status
+onto its own row, and nothing needs a horizontal scroll at 390px.
 
 ## The loading screen
 
