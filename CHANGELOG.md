@@ -9,6 +9,7 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 - The pieces each side has taken are shown beside the board, the computer's above it
   and yours below, so the material on the board and off it can be read at a glance.
+  They sit on a pale shelf, which makes the black ones visible on a phone.
 - Pieces can be dragged to their square with a mouse or a finger, as well as tapped.
   A piece's legal destinations appear while it is in the air, and letting go anywhere
   else puts the piece back.

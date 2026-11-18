@@ -46,19 +46,28 @@ body {
 }
 
 /* A row of pieces that are out of the game: on the line it never leaves, in value
-   order, drawn smaller than a square's piece so the board stays the thing you see. */
+   order, drawn smaller than a square's piece so the board stays the thing you see.
+   The shelf is light on purpose. On the page's own background a taken black piece is
+   a black shape on near black, which is the defect this shelf fixes: black reads at
+   17:1 on the light square colour, and a white piece keeps the dark outline its
+   artwork already carries. verify.sh holds the ratio. */
 .tray {
     display: flex;
     align-items: center;
     gap: 0.1rem;
     height: var(--tray);
+    padding: 0 0.3rem;
     overflow: hidden;
+    border-radius: 0.35rem;
+    background: var(--board-light);
 }
 
 .tray img {
     width: calc(var(--tray) - 0.25rem);
     height: calc(var(--tray) - 0.25rem);
-    opacity: 0.7;
+    /* Lifts the white pieces off the cream, and keeps their dark outlines reading.
+       No opacity: a dimmed piece is a piece you cannot see, which was the complaint. */
+    filter: drop-shadow(0 1px 1px rgb(0 0 0 / 45%));
 }
 
 h1 {
@@ -410,6 +419,13 @@ a {
 }
 
 @media (max-width: 30rem) {
+    /* A phone gets a taller shelf, because at arm's length 24-pixel pieces are a guess
+       rather than a picture. --chrome reads this, so the board gives up exactly this
+       much height and no more. */
+    :root {
+        --tray: 2.25rem;
+    }
+
     h1 {
         font-size: 1.6rem;
     }
