@@ -19,9 +19,9 @@ counts files better with clean squares than with labels in the corners).
   property of the grid, not of the pieces.
 - There is no screen between loading and playing: the page opens on a board at the
   weakest level, and the level is a list in the header from the first move.
-- The header's action follows the state: "Restart" while a game runs (same level,
-  fresh board, no result) and "New game" once it is over (fresh board at the level
-  shown). One slot, so the header has one shape.
+- The header's actions follow the state: "Undo" and "Restart" while a game runs
+  (undo is inert at the opening, when there is nothing to take back) and "New game"
+  alone once it is over. The pair sits in one slot, so the header has one shape.
 - The level list is always enabled: mid-game it changes the opponent's next move,
   after a result it changes the next game's.
 - The header holds the level, the status, and that action in that order: level name,

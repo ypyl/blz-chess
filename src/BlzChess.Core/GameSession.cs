@@ -61,6 +61,22 @@ public sealed class GameSession
     }
 
     /// <summary>
+    /// Takes back the player's last move together with the computer's answer, so the
+    /// player gets the move back with the turn. Refused unless it is the player's
+    /// turn, because removing the pair is the only shape a take-back has: giving back
+    /// one move would leave the computer's reply standing.
+    /// </summary>
+    public bool UndoPlayerTurn()
+    {
+        if (Result.IsOver || Game.Position.SideToMove != PlayerColor)
+        {
+            return false;
+        }
+
+        return Game.TrimMoves(2);
+    }
+
+    /// <summary>
     /// The computer's reply, already played. Null when there is nothing to play
     /// because the game is over or it is not the computer's turn.
     /// </summary>

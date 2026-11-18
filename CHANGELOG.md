@@ -13,6 +13,8 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Added
 
+- Take back your last move. The computer's answer goes with it, the position and the
+  history return to what they were, and it is your turn again.
 - Change the opponent level in the middle of a game. The position, the moves played,
   and whose turn it is stay as they are; only the next computer move is chosen at the
   new level.

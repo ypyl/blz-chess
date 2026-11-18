@@ -159,6 +159,110 @@ public class GameFlowTests
         Assert.False(flow.Result.IsOver);
     }
 
+    [Fact(DisplayName = "Taking back the move restores the position")]
+    public async Task TakingBackTheMoveRestoresThePosition()
+    {
+        var flow = new GameFlow(new ScriptedEngine("e7e5"), Level.Strongest);
+        var before = flow.Session.Game.Fen;
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        Assert.NotNull(await flow.PlayEngineMoveAsync());
+        Assert.Equal(2, flow.Session.Game.Moves.Count);
+
+        var undone = flow.UndoLastMove();
+
+        Assert.True(undone);
+        Assert.Equal(before, flow.Session.Game.Fen);
+        Assert.Empty(flow.Session.Game.Moves);
+        Assert.Equal(Color.White, flow.Session.Game.Position.SideToMove);
+        Assert.False(flow.Result.IsOver);
+        Assert.Equal(GameStage.Playing, flow.Stage);
+    }
+
+    [Fact(DisplayName = "There is nothing to take back at the start")]
+    public void ThereIsNothingToTakeBackAtTheStart()
+    {
+        var flow = new GameFlow(new FakeEngine("e7e5"));
+        var before = flow.Session.Game.Fen;
+
+        var undone = flow.UndoLastMove();
+
+        Assert.False(undone);
+        Assert.Equal(before, flow.Session.Game.Fen);
+        Assert.Empty(flow.Session.Game.Moves);
+    }
+
+    [Fact(DisplayName = "The take-back is not offered once the game is over")]
+    public async Task TheTakeBackIsNotOfferedOnceTheGameIsOver()
+    {
+        var flow = new GameFlow(new ScriptedEngine("e7e5", "d8h4"), Level.Strongest);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(5, 1), Squares.Index(5, 2)), out _));
+        Assert.NotNull(await flow.PlayEngineMoveAsync());
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(6, 1), Squares.Index(6, 3)), out _));
+        Assert.NotNull(await flow.PlayEngineMoveAsync());
+        Assert.Equal(GameStage.Finished, flow.Stage);
+
+        Assert.False(flow.UndoLastMove());
+    }
+
+    [Fact]
+    public void TheTakeBackIsRefusedWhileItIsTheComputersTurn()
+    {
+        var flow = new GameFlow(new FakeEngine("e7e5"), Level.Strongest);
+        Assert.True(flow.TryPlayerMove(new Move(Squares.Index(4, 1), Squares.Index(4, 3)), out _));
+        var moves = flow.Session.Game.Moves.Count;
+
+        // The engine has not replied yet, so the pair is half-played.
+        var undone = flow.UndoLastMove();
+
+        Assert.False(undone);
+        Assert.Equal(moves, flow.Session.Game.Moves.Count);
+        Assert.Equal(Color.Black, flow.Session.Game.Position.SideToMove);
+    }
+
+    [Fact]
+    public async Task TheRepetitionStateSurvivesATakeBack()
+    {
+        // One round of knight shuffles: the start position comes back once.
+        var flow = new GameFlow(
+            new ScriptedEngine("b8c6", "c6b8", "b8c6", "c6b8", "b8c6", "c6b8"),
+            Level.Strongest);
+        var round = new[]
+        {
+            new Move(Squares.Index(6, 0), Squares.Index(5, 2)),
+            new Move(Squares.Index(5, 2), Squares.Index(6, 0)),
+        };
+
+        foreach (var player in round)
+        {
+            Assert.True(flow.TryPlayerMove(player, out _));
+            Assert.NotNull(await flow.PlayEngineMoveAsync());
+        }
+
+        Assert.Equal(4, flow.Session.Game.Moves.Count);
+        Assert.False(flow.Result.IsOver);
+
+        // Take the round back entirely.
+        Assert.True(flow.UndoLastMove());
+        Assert.True(flow.UndoLastMove());
+        Assert.Empty(flow.Session.Game.Moves);
+        Assert.Equal(Fen.StartingPosition, flow.Session.Game.Fen);
+        Assert.False(flow.Result.IsOver);
+
+        // The same two rounds again: if the rebuilt repetition keys were stale, the
+        // draw would come early; if they were missing, it would never come.
+        foreach (var roundIndex in (int[])[0, 1])
+        {
+            foreach (var player in round)
+            {
+                Assert.True(flow.TryPlayerMove(player, out _));
+                Assert.NotNull(await flow.PlayEngineMoveAsync());
+            }
+        }
+
+        Assert.Equal(8, flow.Session.Game.Moves.Count);
+        Assert.Equal(ResultKind.ThreefoldRepetition, flow.Result.Kind);
+    }
+
     [Fact]
     public async Task TheEngineMovesAfterThePlayerAndNotBefore()
     {
