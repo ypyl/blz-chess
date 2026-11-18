@@ -54,6 +54,15 @@
         }
     </div>
 
+    @if (_engineMove is { } move)
+    {
+        var (line, head) = ArrowGeometry(move);
+        <svg class="engine-arrow" viewBox="0 0 800 800" aria-hidden="true">
+            <line x1="@line.X1" y1="@line.Y1" x2="@line.X2" y2="@line.Y2" />
+            <polygon points="@head" />
+        </svg>
+    }
+
     <p class="status @(_flow.Stage == GameStage.Finished ? "over" : null)" title="@Status" aria-live="polite">@Status</p>
 
     @if (_error is not null)
@@ -67,6 +76,7 @@
     private int _selected = Squares.None;
     private HashSet<int> _targets = [];
     private bool _thinking;
+    private Move? _engineMove;
     private string? _error;
 
     protected override void OnInitialized() => _flow = new GameFlow(Engine);
@@ -94,6 +104,8 @@
         if (_flow.UndoLastMove())
         {
             ClearSelection();
+            // The move the arrow described is gone with the take-back.
+            _engineMove = null;
         }
     }
 
@@ -108,6 +120,7 @@
         if (_flow.Restart())
         {
             ClearSelection();
+            _engineMove = null;
             _thinking = false;
             _error = null;
         }
@@ -117,6 +130,7 @@
     {
         _flow.NewGame();
         ClearSelection();
+        _engineMove = null;
         _thinking = false;
         _error = null;
     }
@@ -169,6 +183,7 @@
             if (_flow.TryPlayerMove(move, out _))
             {
                 ClearSelection();
+                _engineMove = null;
                 await EngineReplyAsync();
                 return;
             }
@@ -202,7 +217,7 @@
         StateHasChanged();
         try
         {
-            await _flow.PlayEngineMoveAsync();
+            _engineMove = await _flow.PlayEngineMoveAsync();
             _error = null;
         }
         catch (Exception)
@@ -215,6 +230,46 @@
             StateHasChanged();
         }
     }
+
+    /// <summary>
+    /// The arrow of the computer's last move, in a coordinate system where the board is
+    /// 800 by 800 and a square is 100: the line runs between the square centres, and
+    /// the head sits on the destination centre pointing along the move.
+    /// </summary>
+    private static ((double X1, double Y1, double X2, double Y2) Line, string Head) ArrowGeometry(Move move)
+    {
+        var (x1, y1) = SquareCentre(move.From);
+        var (x2, y2) = SquareCentre(move.To);
+        var dx = x2 - x1;
+        var dy = y2 - y1;
+        var length = Math.Sqrt((dx * dx) + (dy * dy));
+        if (length < 1)
+        {
+            return ((x1, y1, x2, y2), string.Empty);
+        }
+
+        // The shaft stops short of the head, and the head stops short of the square
+        // centre, so the tip lands inside the destination square, not on its edge.
+        var ux = dx / length;
+        var uy = dy / length;
+        var headLength = 34.0;
+        var headWidth = 22.0;
+        var tipX = x2 - (ux * 18);
+        var tipY = y2 - (uy * 18);
+        var shaftEndX = tipX - (ux * headLength);
+        var shaftEndY = tipY - (uy * headLength);
+        var leftX = shaftEndX + (-uy * (headWidth / 2));
+        var leftY = shaftEndY + (ux * (headWidth / 2));
+        var rightX = shaftEndX - (-uy * (headWidth / 2));
+        var rightY = shaftEndY - (ux * (headWidth / 2));
+
+        return (
+            (x1, y1, shaftEndX, shaftEndY),
+            FormattableString.Invariant($"{tipX:F1},{tipY:F1} {leftX:F1},{leftY:F1} {rightX:F1},{rightY:F1}"));
+    }
+
+    private static (double X, double Y) SquareCentre(int square) =>
+        ((Squares.FileOf(square) * 100.0) + 50, ((7 - Squares.RankOf(square)) * 100.0) + 50);
 
     private static string PiecePath(Piece piece) => $"pieces/{PieceFiles.FileName(piece)}";
 

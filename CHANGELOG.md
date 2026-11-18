@@ -29,6 +29,8 @@ are in `AGENTS.md` under **Versions and changelog**.
 
 ### Fixed
 
+- The computer's move is shown as an arrow on the board, from the square the piece
+  left to the one it landed on, so a glance is enough to see what the opponent did.
 - The status line, "Your move" and the result, moved from the header to under the
   board, where a player looks while playing. The header keeps the level and the
   actions.
