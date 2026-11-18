@@ -41,6 +41,43 @@ fi
 
 # --- project checks --------------------------------------------------------
 
+# The loading board is static markup, so nothing derives its colours the way the game
+# board does. Assert the real board's parity here: a square is light when its file and
+# rank differ in parity, which makes a8 light and a1 dark. An inverted loading board
+# shipped once, and it is invisible until someone looks at it.
+if command -v node >/dev/null 2>&1; then
+  parity=$(node -e '
+const fs = require("fs");
+const html = fs.readFileSync("src/BlzChess.Web/wwwroot/index.html", "utf8");
+const start = html.indexOf("<div class=\"loading-board\"");
+const block = start < 0 ? "" : html.slice(start, html.indexOf("</div>", start));
+const cells = [...block.matchAll(/class="(light|dark)"/g)].map((m) => m[1]);
+if (cells.length !== 64) {
+  console.log("expected 64 squares, found " + cells.length);
+  process.exit(1);
+}
+const expected = (i) => (((7 - Math.floor(i / 8)) + (i % 8)) % 2 === 1 ? "light" : "dark");
+const wrong = cells.findIndex((cell, i) => cell !== expected(i));
+if (wrong >= 0) {
+  console.log("square " + wrong + " is " + cells[wrong] + ", a real board has " + expected(wrong));
+  process.exit(1);
+}
+console.log("64 squares, a8 light and a1 dark");
+')
+  if [[ $? -ne 0 ]]; then
+    printf '
+==> Loading board: colours inverted
+'
+    printf '%s
+' "$parity" | sed 's/^/  FAIL /'
+    status=1
+  else
+    printf '
+==> Loading board: %s
+' "$parity"
+  fi
+fi
+
 # GitHub Pages does not serve dotfiles, so a dotfile in the site is a 404 in the
 # service worker's asset list, and one failed asset fails the whole install: the
 # app stops being installable and offline-capable.
