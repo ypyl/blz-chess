@@ -13,20 +13,14 @@
 /* One scale for the whole page. Every size in this stylesheet is in rem, so the root
    font-size is the size of the app: the board, the header, the buttons, the type, and the
    shelves grow and shrink together instead of the board shrinking alone inside a fixed
-   chrome. The design size is 1rem; 15.8rem is everything that is not the board, so the
-   fraction is "how much of a full-size app still fits", and the floor keeps the type
-   readable when the window cannot hold one. Below the floor the board takes the rest,
-   which is what its own height cap already does.
-   The two caps are the board's own: a narrow window binds on width, a short one on
-   height, and the smaller of the two is what scales, so the board cannot shrink while the
-   frame around it stays put. That was the first version of this rule, and it left the
-   board alone at 74% of its frame on a 420-pixel-wide window.
-   shortcut: the floor means a window narrower than about 24rem, or shorter than about
-   24rem of usable height, scales no further, so the board is then capped by its own rule
-   and the chrome is proportionally larger; revisit if a phone that narrow ever needs the
-   board to fill what is left. */
+   frame. Width decides it, and only width: a short window scrolls rather than handing the
+   board a smaller square, because the board is the game and shrinking it is the worst
+   thing the layout can do to it.
+   shortcut: the floor keeps type readable on a very narrow window, where the board is then
+   the width of the screen and the frame is proportionally larger; revisit if a phone
+   narrower than about 24rem ever needs the frame to shrink with it. */
 html {
-    font-size: clamp(0.8rem, min(calc(96vw / 34), calc((100vh - 15.8rem) / 34)), 1rem);
+    font-size: clamp(0.8rem, calc(96vw / 34), 1rem);
 }
 
 html,
@@ -50,9 +44,6 @@ body {
        view, so a capture cannot change the shell's height and push the board. */
     --tray: 1.75rem;
     --shell-gap: 0.9rem;
-    /* What the board must leave for everything that is not the board: the header, the
-       status line, two trays, and the gaps between them. */
-    --chrome: calc(10.5rem + var(--tray) + var(--tray) + var(--shell-gap) + var(--shell-gap));
 }
 
 .shell {
@@ -223,7 +214,7 @@ a {
     aspect-ratio: 1;
     /* Capped by the viewport height, not the width alone, so a landscape phone
        still holds the whole board without scrolling. */
-    width: min(96vw, 34rem, calc(100vh - var(--chrome)));
+    width: min(96vw, 34rem);
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -432,7 +423,7 @@ a {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     grid-template-rows: repeat(8, minmax(0, 1fr));
     aspect-ratio: 1;
-    width: min(92vw, 34rem, calc(100vh - var(--chrome)));
+    width: min(92vw, 34rem);
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 18px 40px rgb(0 0 0 / 45%);
@@ -477,12 +468,12 @@ a {
    actually gives the page. The plain vh fallback above keeps older browsers working. */
 @supports (height: 100dvh) {
     html {
-        font-size: clamp(0.8rem, min(calc(96vw / 34), calc((100dvh - 15.8rem) / 34)), 1rem);
+        font-size: clamp(0.8rem, calc(96vw / 34), 1rem);
     }
 
     .board,
     .loading-board {
-        width: min(96vw, 34rem, calc(100dvh - var(--chrome)));
+        width: min(96vw, 34rem);
     }
 }
 
@@ -499,6 +490,6 @@ a {
     }
 
     .shell {
-        width: min(96vw, calc(100dvh - var(--chrome)));
+        width: min(96vw, 34rem);
     }
 }
