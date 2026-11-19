@@ -66,9 +66,9 @@ counts files better with clean squares than with labels in the corners).
   tap, so tapping a piece and tapping its destination works exactly as before.
 
 The app has one size. Everything in the stylesheet is in rem, and the root font-size is
-that size: the design size until the window cannot hold it, then the fraction of the design
-that fits — narrowed by width or by height, whichever is tighter — floored at 0.8 where type
-stops being readable and controls stop being tappable. So the board, the header, the
+that size. Width decides it and only width, so the board never hands back a smaller square
+to make room for the frame: a short window scrolls instead. The floor at 0.8 keeps type
+readable and controls tappable on a very narrow screen. So the board, the header, the
 buttons, the type, and the shelves scale together rather than the board shrinking inside a
 frame built for a bigger one.
 
