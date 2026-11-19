@@ -105,7 +105,22 @@
                 location.reload();
             });
             navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' })
-                .then(registration => registration.update());
+                .then(registration => {
+                    registration.update();
+
+                    // An installed app is resumed, not reloaded: Android keeps the page
+                    // alive for days, so this script runs once and the check above never
+                    // runs again while the build changes underneath. Ask again whenever the
+                    // app comes back to the foreground, which is the moment a person would
+                    // notice they are looking at an old board.
+                    const check = () => {
+                        if (document.visibilityState === 'visible') {
+                            registration.update();
+                        }
+                    };
+                    document.addEventListener('visibilitychange', check);
+                    window.addEventListener('pageshow', check);
+                });
         }
     </script>
 </body>
